@@ -20,5 +20,7 @@ def test_demo_flow_stub(monkeypatch):
     assert "route" in result
     assert "audio" in result
     assert "qos" in result
+    assert "timeline" in result
+    assert result["summary"].startswith("RawiAI found")
     assert "Geofencing" in result["camara_calls"]
     assert result["location"]["near_monument"] == "Al Hisn Fort"
