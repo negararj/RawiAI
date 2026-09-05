@@ -15,6 +15,9 @@ class RawiState(rx.State):
     route: str = ""
     camara_status: str = ""
     qos_status: str = ""
+    current_site: str = ""
+    geofence_status: str = ""
+    route_reason: str = ""
 
     def set_language(self, language: str):
         self.language = language
@@ -25,6 +28,7 @@ class RawiState(rx.State):
     def start_demo(self):
         self.status = "Checking location with CAMARA APIs..."
         result = run_demo_flow(self.question, language=self.language)
+        self.current_site = result["location"]["near_monument"]
         self.answer = result["qa"]["answer"]
         self.route = result["route"]["route"]
         self.camara_status = (
@@ -32,5 +36,7 @@ class RawiState(rx.State):
             f"Location: {result['location']['verification']['source']} | "
             f"Congestion: {result['route']['congestion']['source']}"
         )
+        self.geofence_status = f"Geofence: {result['location']['geofence']['status']}"
+        self.route_reason = result["route"]["reason"]
         self.qos_status = f"QoD: {result['qos']['status']}"
         self.status = "Story ready"

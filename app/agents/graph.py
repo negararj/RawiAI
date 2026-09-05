@@ -17,7 +17,7 @@ def run_demo_flow(
     identity_result = verify_number(NOKIA_TEST_PHONE_NUMBER or "+99999991000")
     location_result = run_location_agent()
     qa_result = answer_question(question, language=language)
-    route_result = suggest_route("al-hisn-fort")
+    route_result = suggest_route(location_result["site"]["id"])
     audio_result = text_to_speech(qa_result["answer"])
     qos_result = request_qos("rawiai-story-session")
 
@@ -29,4 +29,10 @@ def run_demo_flow(
         "route": route_result,
         "audio": audio_result,
         "qos": qos_result,
+        "camara_calls": [
+            "Number Verification",
+            *location_result["camara_calls"],
+            *route_result["camara_calls"],
+            "Quality on Demand",
+        ],
     }

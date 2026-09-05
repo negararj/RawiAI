@@ -20,3 +20,5 @@ def test_demo_flow_stub(monkeypatch):
     assert "route" in result
     assert "audio" in result
     assert "qos" in result
+    assert "Geofencing" in result["camara_calls"]
+    assert result["location"]["near_monument"] == "Al Hisn Fort"
