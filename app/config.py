@@ -13,6 +13,7 @@ NOKIA_RAPIDAPI_HOST = os.getenv(
     "NOKIA_RAPIDAPI_HOST",
     "network-as-code.nokia.rapidapi.com",
 )
+NOKIA_TEST_PHONE_NUMBER = os.getenv("NOKIA_TEST_PHONE_NUMBER", "")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 

@@ -79,6 +79,7 @@ Put your real keys there:
 ```env
 NOKIA_API_KEY=your_nokia_key_here
 NOKIA_RAPIDAPI_HOST=network-as-code.nokia.rapidapi.com
+NOKIA_TEST_PHONE_NUMBER=+99999991000
 
 GEMINI_API_KEY=your_gemini_key_here
 
@@ -338,6 +339,22 @@ verify_location()
 ```
 
 with the real Nokia Location Verification API.
+
+This function needs:
+
+```text
+NOKIA_API_KEY
+NOKIA_TEST_PHONE_NUMBER
+site latitude
+site longitude
+site radius in meters
+```
+
+For Nokia simulator testing, put this in `.env`:
+
+```env
+NOKIA_TEST_PHONE_NUMBER=+99999991000
+```
 
 Purpose:
 
