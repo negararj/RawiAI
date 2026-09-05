@@ -1,0 +1,19 @@
+{
+  "name": "RawiAI",
+  "short_name": "RawiAI",
+  "description": "Network-aware heritage storytelling powered by CAMARA APIs.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff8ee",
+  "theme_color": "#9b4f24",
+  "icons": [
+    {
+      "src": "/rawiai-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

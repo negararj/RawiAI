@@ -59,6 +59,12 @@ Check CAMARA separately from the UI:
 python scripts/check_camara.py
 ```
 
+PWA files live in `assets/` and are linked from the Reflex app:
+
+- `assets/manifest.webmanifest`
+- `assets/service-worker.js`
+- `assets/rawiai-icon.svg`
+
 ## 2. Run Qdrant
 
 ```bash

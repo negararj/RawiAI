@@ -703,11 +703,17 @@ show QoD status
 Files already exist:
 
 ```text
-public/manifest.json
-public/service-worker.js
+assets/manifest.webmanifest
+assets/service-worker.js
+assets/rawiai-icon.svg
 ```
 
-Later, connect them to Reflex so the app can be installed on a phone.
+They are connected in:
+
+```text
+app/main.py
+app/ui/pages.py
+```
 
 For demo day, the most important thing is:
 

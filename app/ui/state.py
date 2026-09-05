@@ -22,6 +22,7 @@ class RawiState(rx.State):
     camara_calls: str = ""
     flow_summary: str = ""
     timeline: str = ""
+    pwa_status: str = "Installable on supported mobile browsers"
 
     def set_language(self, language: str):
         self.language = language

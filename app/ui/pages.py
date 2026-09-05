@@ -31,6 +31,27 @@ def index():
                 "Ask Rawi",
                 story_controls(),
             ),
+            section(
+                "Install",
+                rx.text(RawiState.pwa_status, color="#6b5a50"),
+                rx.button(
+                    "Install RawiAI",
+                    on_click=rx.call_script(
+                        """
+if (window.rawiInstallPrompt) {
+  window.rawiInstallPrompt.prompt();
+  window.rawiInstallPrompt.userChoice.finally(() => {
+    window.rawiInstallPrompt = null;
+  });
+} else {
+  alert("Install is available from your browser menu on supported devices.");
+}
+"""
+                    ),
+                    variant="soft",
+                    color_scheme="orange",
+                ),
+            ),
             rx.text(RawiState.language, id="rawi-language", display="none"),
             section(
                 "Current Site",
@@ -82,6 +103,20 @@ if (text.trim()) {
             ),
             spacing="5",
             align="stretch",
+        ),
+        rx.script(
+            """
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js");
+  });
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  window.rawiInstallPrompt = event;
+});
+"""
         ),
         max_width="680px",
         min_height="100vh",
