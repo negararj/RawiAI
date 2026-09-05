@@ -22,8 +22,8 @@ RAWIAI_APPLICATION_SERVER_IPV4 = os.getenv("RAWIAI_APPLICATION_SERVER_IPV4", "8.
 NOKIA_QOS_PROFILE = os.getenv("NOKIA_QOS_PROFILE", "DOWNLINK_M_UPLINK_L")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "text-embedding-004")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
 
 RAWIAI_USE_QDRANT = os.getenv("RAWIAI_USE_QDRANT", "false").lower() == "true"
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
