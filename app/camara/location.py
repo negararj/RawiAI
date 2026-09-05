@@ -1,16 +1,8 @@
 """CAMARA Location Retrieval and Location Verification wrappers."""
 
-from app.config import NOKIA_API_KEY, NOKIA_TEST_PHONE_NUMBER
+from app.config import NOKIA_API_KEY, NOKIA_TEST_PHONE_NUMBER, RAWIAI_USE_LIVE_APIS
 from app.camara.client import get_nokia_client
-
-
-def _to_dict(response) -> dict:
-    """Convert a Nokia SDK response object into a normal Python dict."""
-    if hasattr(response, "model_dump"):
-        return response.model_dump(mode="json", by_alias=True)
-    if hasattr(response, "dict"):
-        return response.dict(by_alias=True)
-    return dict(response)
+from app.camara.utils import api_error, to_dict
 
 
 def verify_location(lat: float, lon: float, radius_meters: int) -> dict:
@@ -18,37 +10,47 @@ def verify_location(lat: float, lon: float, radius_meters: int) -> dict:
 
     CAMARA capability: Location Verification.
     """
-    if not NOKIA_API_KEY or not NOKIA_TEST_PHONE_NUMBER:
+    if not RAWIAI_USE_LIVE_APIS or not NOKIA_API_KEY or not NOKIA_TEST_PHONE_NUMBER:
         return {
-            "verified": False,
-            "verification_result": "UNKNOWN",
+            "verified": True,
+            "verification_result": "DEMO_TRUE",
             "lat": lat,
             "lon": lon,
             "radius_meters": radius_meters,
-            "source": "stub-missing-nokia-config",
+            "source": "demo-camara-location-verification",
             "message": (
-                "Add NOKIA_API_KEY and NOKIA_TEST_PHONE_NUMBER to .env "
-                "to call Nokia Location Verification."
+                "Demo mode is using simulated CAMARA Location Verification. "
+                "Set RAWIAI_USE_LIVE_APIS=true to call Nokia."
             ),
         }
 
-    client = get_nokia_client()
-
-    response = client.location.verify_v1(
-        device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
-        area={
-            "area_type": "CIRCLE",
-            "center": {
-                "latitude": lat,
-                "longitude": lon,
+    try:
+        client = get_nokia_client()
+        response = client.location.verify_v1(
+            device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
+            area={
+                "area_type": "CIRCLE",
+                "center": {
+                    "latitude": lat,
+                    "longitude": lon,
+                },
+                "radius": radius_meters,
             },
-            "radius": radius_meters,
-        },
-        max_age=60,
-        correlator="rawiai-location-check",
-    )
+            max_age=60,
+            correlator="rawiai-location-check",
+        )
+    except Exception as exc:
+        error = api_error("nokia-camara-location-verification", exc)
+        return {
+            "verified": False,
+            "verification_result": "ERROR",
+            "lat": lat,
+            "lon": lon,
+            "radius_meters": radius_meters,
+            **error,
+        }
 
-    data = _to_dict(response)
+    data = to_dict(response)
     verification_result = data.get("verificationResult", "UNKNOWN")
 
     return {
@@ -69,9 +71,36 @@ def get_device_location() -> dict:
 
     CAMARA capability: Location Retrieval.
     """
+    if not RAWIAI_USE_LIVE_APIS or not NOKIA_API_KEY or not NOKIA_TEST_PHONE_NUMBER:
+        return {
+            "lat": 25.3573,
+            "lon": 55.3820,
+            "accuracy_meters": 100,
+            "source": "demo-camara-location-retrieval",
+            "message": (
+                "Demo mode is using simulated CAMARA Location Retrieval. "
+                "Set RAWIAI_USE_LIVE_APIS=true to call Nokia."
+            ),
+        }
+
+    try:
+        client = get_nokia_client()
+        response = client.location.retrieve(
+            device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
+            max_age=60,
+        )
+    except Exception as exc:
+        return {
+            "area": {},
+            "source": "nokia-camara-location-retrieval",
+            **api_error("nokia-camara-location-retrieval", exc),
+        }
+
+    data = to_dict(response)
+
     return {
-        "lat": 25.3573,
-        "lon": 55.3820,
-        "accuracy_meters": 100,
-        "source": "stub",
+        "area": data.get("area", {}),
+        "last_location_time": data.get("lastLocationTime"),
+        "source": "nokia-camara-location-retrieval",
+        "raw": data,
     }

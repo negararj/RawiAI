@@ -13,6 +13,8 @@ class RawiState(rx.State):
     status: str = "Ready"
     answer: str = ""
     route: str = ""
+    camara_status: str = ""
+    qos_status: str = ""
 
     def set_language(self, language: str):
         self.language = language
@@ -22,8 +24,13 @@ class RawiState(rx.State):
 
     def start_demo(self):
         self.status = "Checking location with CAMARA APIs..."
-        result = run_demo_flow(self.question)
+        result = run_demo_flow(self.question, language=self.language)
         self.answer = result["qa"]["answer"]
         self.route = result["route"]["route"]
+        self.camara_status = (
+            f"Identity: {result['identity']['source']} | "
+            f"Location: {result['location']['verification']['source']} | "
+            f"Congestion: {result['route']['congestion']['source']}"
+        )
+        self.qos_status = f"QoD: {result['qos']['status']}"
         self.status = "Story ready"
-

@@ -39,6 +39,20 @@ copy .env.example .env
 
 Add your real Nokia and Gemini keys to `.env`.
 
+Keep live APIs off while rehearsing the demo:
+
+```env
+RAWIAI_USE_LIVE_APIS=false
+RAWIAI_USE_GEMINI=false
+```
+
+Turn Gemini on only when you want to test the real Gemini API:
+
+```env
+RAWIAI_USE_GEMINI=true
+GEMINI_MODEL=gemini-2.5-flash
+```
+
 ## 2. Run Qdrant
 
 ```bash

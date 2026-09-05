@@ -15,6 +15,9 @@ def index():
             story_controls(),
             rx.divider(),
             rx.text(RawiState.status),
+            rx.text(RawiState.language, id="rawi-language", display="none"),
+            rx.heading("CAMARA Status", size="4"),
+            rx.text(RawiState.camara_status),
             rx.heading("Answer", size="4"),
             rx.text(RawiState.answer, id="rawi-answer"),
             rx.button(
@@ -22,10 +25,11 @@ def index():
                 on_click=rx.call_script(
                     """
 const text = document.getElementById("rawi-answer")?.innerText || "";
+const language = document.getElementById("rawi-language")?.innerText || "en";
 if (text.trim()) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
+  utterance.lang = language === "ar" ? "ar-SA" : "en-US";
   window.speechSynthesis.speak(utterance);
 }
 """
@@ -33,6 +37,8 @@ if (text.trim()) {
             ),
             rx.heading("Route", size="4"),
             rx.text(RawiState.route),
+            rx.heading("Network Quality", size="4"),
+            rx.text(RawiState.qos_status),
             spacing="4",
             align="stretch",
         ),

@@ -21,5 +21,5 @@ def get_nokia_client():
     return NetworkAsCodeApi(
         rapidapi_host=NOKIA_RAPIDAPI_HOST,
         api_key=NOKIA_API_KEY,
+        timeout=8,
     )
-

@@ -1,7 +1,15 @@
 """Agent that answers visitor questions from heritage content."""
 
-from app.config import GEMINI_API_KEY
+from app.config import GEMINI_API_KEY, GEMINI_MODEL, RAWIAI_USE_GEMINI
 from app.rag.retrieve import retrieve_facts
+
+
+def _fallback_answer(facts: list[dict]) -> str:
+    """Return a safe local answer when Gemini is unavailable."""
+    if not facts:
+        return "I do not have enough verified heritage information yet."
+
+    return facts[0]["text"]
 
 
 def _build_prompt(question: str, language: str, facts: list[dict]) -> str:
@@ -35,17 +43,20 @@ Heritage facts:
 def _generate_with_gemini(prompt: str) -> str:
     """Generate an answer using Gemini."""
     try:
-        import google.generativeai as genai
+        from google import genai
     except ImportError as exc:
         raise RuntimeError(
-            "Install Gemini support first: python -m pip install google-generativeai"
+            "Install Gemini support first: python -m pip install google-genai"
         ) from exc
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+    )
 
-    return response.text.strip()
+    text = getattr(response, "text", "") or ""
+    return text.strip()
 
 
 def answer_question(question: str, language: str = "en") -> dict:
@@ -53,14 +64,15 @@ def answer_question(question: str, language: str = "en") -> dict:
     facts = retrieve_facts(question, language=language)
     prompt = _build_prompt(question, language, facts)
 
-    if GEMINI_API_KEY:
-        answer = _generate_with_gemini(prompt)
-        source = "gemini"
+    if RAWIAI_USE_GEMINI and GEMINI_API_KEY:
+        try:
+            answer = _generate_with_gemini(prompt)
+            source = f"gemini:{GEMINI_MODEL}"
+        except Exception as exc:
+            answer = _fallback_answer(facts)
+            source = f"local-fallback-gemini-error:{exc.__class__.__name__}"
     else:
-        answer = (
-            "Gemini is not connected yet. Add GEMINI_API_KEY to your .env file. "
-            f"For now, here are the verified notes I found: {facts[0]['text']}"
-        )
+        answer = _fallback_answer(facts)
         source = "local-fallback"
 
     return {

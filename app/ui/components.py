@@ -7,8 +7,8 @@ from app.ui.state import RawiState
 
 def language_toggle():
     return rx.hstack(
-        rx.button("English", on_click=lambda: RawiState.set_language("en")),
-        rx.button("Arabic", on_click=lambda: RawiState.set_language("ar")),
+        rx.button("English", on_click=RawiState.set_language("en")),
+        rx.button("Arabic", on_click=RawiState.set_language("ar")),
         spacing="2",
     )
 
@@ -24,4 +24,3 @@ def story_controls():
         spacing="3",
         width="100%",
     )
-

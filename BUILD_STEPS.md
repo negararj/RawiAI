@@ -77,11 +77,17 @@ Open `.env`.
 Put your real keys there:
 
 ```env
+RAWIAI_USE_LIVE_APIS=false
+
 NOKIA_API_KEY=your_nokia_key_here
 NOKIA_RAPIDAPI_HOST=network-as-code.nokia.rapidapi.com
 NOKIA_TEST_PHONE_NUMBER=+99999991000
+NOKIA_GEOFENCE_SINK_URL=https://your-public-url.com/geofence
+RAWIAI_APPLICATION_SERVER_IPV4=8.8.8.8
+NOKIA_QOS_PROFILE=DOWNLINK_M_UPLINK_L
 
 GEMINI_API_KEY=your_gemini_key_here
+GEMINI_MODEL=gemini-2.5-flash
 
 QDRANT_URL=http://localhost:6333
 ```
@@ -283,6 +289,27 @@ grounded in the facts
 
 Do not let Gemini invent historical facts. Tell it to only use the retrieved content.
 
+Important:
+
+```env
+RAWIAI_USE_GEMINI=false
+```
+
+means the app uses your local markdown narration.
+
+```env
+RAWIAI_USE_GEMINI=true
+```
+
+means the app calls the real Gemini API.
+
+You can keep Nokia/CAMARA in demo mode while Gemini is live:
+
+```env
+RAWIAI_USE_LIVE_APIS=false
+RAWIAI_USE_GEMINI=true
+```
+
 ## Step 12: Connect Free Browser Voice
 
 Open:
@@ -388,6 +415,21 @@ Purpose:
 Get approximate network-based visitor location.
 ```
 
+In the code, this calls:
+
+```python
+client.location.retrieve(
+    device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
+    max_age=60,
+)
+```
+
+This means:
+
+- `device`: the test SIM/device Nokia should locate.
+- `phone_number`: the simulator phone number.
+- `max_age`: accepts a location result up to 60 seconds old.
+
 ### 13.3 Geofencing
 
 Open:
@@ -407,6 +449,21 @@ Purpose:
 ```text
 When a visitor enters the site, the network can trigger the welcome experience.
 ```
+
+In the code, this calls:
+
+```python
+client.geofencing.create_subscription(...)
+```
+
+This means:
+
+- `protocol`: HTTP webhook delivery.
+- `sink`: your public webhook URL.
+- `types`: the event you want, such as area entered.
+- `subscription_detail.device`: the visitor device.
+- `subscription_detail.area`: the heritage-site circle.
+- `initial_event`: lets Nokia send an event immediately if the device is already inside.
 
 Open:
 
@@ -444,6 +501,20 @@ Purpose:
 Detect whether an area is crowded or the network is busy.
 ```
 
+In the code, this calls:
+
+```python
+client.congestion_insights.query(
+    device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
+)
+```
+
+This means:
+
+- Nokia checks congestion information for the test device.
+- The app looks for `Low`, `Medium`, or `High`.
+- If congestion is `Medium` or `High`, the Route Agent recommends a quieter route.
+
 Then open:
 
 ```text
@@ -477,6 +548,24 @@ Purpose:
 Request better network quality for the audio storytelling session.
 ```
 
+In the code, this calls:
+
+```python
+client.qod.create_session_v1(
+    device={"phone_number": NOKIA_TEST_PHONE_NUMBER},
+    application_server={"ipv4address": RAWIAI_APPLICATION_SERVER_IPV4},
+    qos_profile=NOKIA_QOS_PROFILE,
+    duration=300,
+)
+```
+
+This means:
+
+- `device`: the visitor phone/session.
+- `application_server`: the server sending the story/audio.
+- `qos_profile`: the requested quality profile.
+- `duration`: 300 seconds, or 5 minutes.
+
 Use this right before or during audio playback.
 
 ### 13.6 Number Verification
@@ -498,6 +587,16 @@ Purpose:
 ```text
 Passwordless visitor identity.
 ```
+
+In the code, this calls:
+
+```python
+client.number_verification.verify_v2(
+    request={"phone_number": phone_number},
+)
+```
+
+This means Nokia checks whether the authenticated device matches the phone number.
 
 This is useful, but less important than location, geofencing, congestion, and QoD.
 
