@@ -53,6 +53,12 @@ RAWIAI_USE_GEMINI=true
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
+Check CAMARA separately from the UI:
+
+```bash
+python scripts/check_camara.py
+```
+
 ## 2. Run Qdrant
 
 ```bash

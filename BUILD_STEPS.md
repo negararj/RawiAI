@@ -851,6 +851,16 @@ Also own the Amina demo story.
 
 ## Step 20: Demo Checklist
 
+Before testing in the browser, test CAMARA from the terminal:
+
+```bash
+python scripts/check_camara.py
+```
+
+In demo mode, the results should say `demo-camara-*`.
+
+In live mode, the results should say `nokia-camara-*`.
+
 Before judging, make sure this works:
 
 ```text
