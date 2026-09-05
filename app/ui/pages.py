@@ -2,107 +2,71 @@
 
 import reflex as rx
 
-from app.ui.components import language_toggle, section, story_controls
+from app.ui.components import (
+    ask_card,
+    brand_header,
+    hero,
+    install_card,
+    network_card,
+    route_card,
+    site_card,
+    story_card,
+    timeline_card,
+    trust_rail,
+    SAND,
+    INK_SOFT,
+)
 from app.ui.state import RawiState
+
+PAGE_STYLE = {
+    "min_height": "100vh",
+    "width": "100%",
+    "display": "flex",
+    "justify_content": "center",
+    "background": f"radial-gradient(circle at 15% 0%, #F3E3C9 0%, {SAND} 45%, #EAF3F1 100%)",
+    "padding": "32px 16px",
+    "box_sizing": "border-box",
+}
+
+SHELL_STYLE = {
+    "width": "100%",
+    "max_width": "440px",
+    "display": "flex",
+    "flex_direction": "column",
+    "gap": "16px",
+}
 
 
 def index():
-    return rx.container(
-        rx.vstack(
-            rx.vstack(
-                rx.text("Nokia CAMARA demo", color="#7a4b2a", weight="bold"),
-                rx.heading("RawiAI", size="9", color="#2d1f17"),
-                rx.text(
-                    "Network-aware heritage storytelling for MENA sites.",
-                    color="#5f4a3e",
-                ),
-                spacing="2",
-                align="start",
-                width="100%",
-            ),
-            rx.hstack(
-                language_toggle(),
-                rx.spacer(),
-                rx.badge(RawiState.status, color_scheme="orange", size="2"),
-                width="100%",
-                align="center",
-            ),
-            section(
-                "Ask Rawi",
-                story_controls(),
-            ),
-            section(
-                "Install",
-                rx.text(RawiState.pwa_status, color="#6b5a50"),
-                rx.button(
-                    "Install RawiAI",
-                    on_click=rx.call_script(
-                        """
-if (window.rawiInstallPrompt) {
-  window.rawiInstallPrompt.prompt();
-  window.rawiInstallPrompt.userChoice.finally(() => {
-    window.rawiInstallPrompt = null;
-  });
-} else {
-  alert("Install is available from your browser menu on supported devices.");
-}
-"""
-                    ),
-                    variant="soft",
-                    color_scheme="orange",
+    return rx.el.div(
+        rx.el.div(
+            brand_header(),
+            hero(),
+            trust_rail(),
+            ask_card(),
+            rx.cond(
+                RawiState.started,
+                rx.el.div(
+                    site_card(),
+                    story_card(),
+                    route_card(),
+                    network_card(),
+                    timeline_card(),
+                    style={"display": "flex", "flex_direction": "column", "gap": "16px"},
                 ),
             ),
-            rx.text(RawiState.language, id="rawi-language", display="none"),
-            section(
-                "Current Site",
-                rx.text(RawiState.current_site, color="#3b2a20", weight="bold"),
-                rx.text(RawiState.flow_summary, color="#6b5a50"),
+            install_card(),
+            rx.el.p(
+                "DevNull · Immersive Tourism & Smart Cities · Nokia CAMARA Hackathon",
+                style={
+                    "font_size": "11px",
+                    "color": INK_SOFT,
+                    "text_align": "center",
+                    "margin": "4px 0 0 0",
+                },
             ),
-            section(
-                "CAMARA Proof",
-                rx.text(RawiState.camara_calls, color="#3b2a20"),
-                rx.text(RawiState.camara_status, color="#6b5a50"),
-                rx.text(RawiState.geofence_status, color="#6b5a50"),
-            ),
-            section(
-                "Story",
-                rx.text(RawiState.story_source, color="#7a4b2a"),
-                rx.text(
-                    RawiState.answer,
-                    id="rawi-answer",
-                    color="#2d1f17",
-                    line_height="1.7",
-                ),
-                rx.button(
-                    "Speak Story",
-                    on_click=rx.call_script(
-                        """
-const text = document.getElementById("rawi-answer")?.innerText || "";
-const language = document.getElementById("rawi-language")?.innerText || "en";
-if (text.trim()) {
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = language === "ar" ? "ar-SA" : "en-US";
-  window.speechSynthesis.speak(utterance);
-}
-"""
-                    ),
-                    variant="outline",
-                    color_scheme="orange",
-                ),
-            ),
-            section(
-                "Route",
-                rx.text(RawiState.route, color="#2d1f17", weight="bold"),
-                rx.text(RawiState.route_reason, color="#6b5a50"),
-            ),
-            section(
-                "Network Quality",
-                rx.text(RawiState.qos_status, color="#2d1f17", weight="bold"),
-                rx.text(RawiState.timeline, color="#6b5a50"),
-            ),
-            spacing="5",
-            align="stretch",
+            style=SHELL_STYLE,
+            custom_attrs={"dir": RawiState.dir},
         ),
         rx.script(
             """
@@ -118,8 +82,5 @@ window.addEventListener("beforeinstallprompt", (event) => {
 });
 """
         ),
-        max_width="680px",
-        min_height="100vh",
-        padding="24px",
-        background="#fff8ee",
+        style=PAGE_STYLE,
     )
