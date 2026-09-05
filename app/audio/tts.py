@@ -1,12 +1,15 @@
-"""ElevenLabs text-to-speech skeleton."""
+"""Free browser text-to-speech helper."""
 
 
-def text_to_speech(text: str, voice: str = "default") -> dict:
-    """Convert generated story text into audio."""
+def text_to_speech(text: str) -> dict:
+    """Tell the UI that the story can be spoken by the browser.
+
+    The actual voice runs in the visitor's browser with Web Speech API, so no
+    paid text-to-speech provider or API key is required.
+    """
     return {
         "text": text,
-        "voice": voice,
         "audio_url": None,
-        "status": "stub",
+        "provider": "browser-speech-synthesis",
+        "status": "ready",
     }
-

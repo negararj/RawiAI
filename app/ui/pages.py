@@ -16,7 +16,21 @@ def index():
             rx.divider(),
             rx.text(RawiState.status),
             rx.heading("Answer", size="4"),
-            rx.text(RawiState.answer),
+            rx.text(RawiState.answer, id="rawi-answer"),
+            rx.button(
+                "Speak Story",
+                on_click=rx.call_script(
+                    """
+const text = document.getElementById("rawi-answer")?.innerText || "";
+if (text.trim()) {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  window.speechSynthesis.speak(utterance);
+}
+"""
+                ),
+            ),
             rx.heading("Route", size="4"),
             rx.text(RawiState.route),
             spacing="4",
@@ -25,4 +39,3 @@ def index():
         max_width="520px",
         padding="24px",
     )
-

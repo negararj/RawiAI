@@ -15,7 +15,5 @@ NOKIA_RAPIDAPI_HOST = os.getenv(
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-

@@ -37,7 +37,7 @@ Copy the environment file:
 copy .env.example .env
 ```
 
-Add your real Nokia, Gemini, and ElevenLabs keys to `.env`.
+Add your real Nokia and Gemini keys to `.env`.
 
 ## 2. Run Qdrant
 
@@ -68,4 +68,3 @@ Track 5 owns `app/content/`, the demo script, and the pitch.
 Start with stubs, then replace one stub at a time with the real API call.
 
 Do not connect everything at once. Test each CAMARA function alone first.
-

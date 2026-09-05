@@ -7,7 +7,7 @@ The goal is not to finish everything at once. The goal is to make the app work i
 1. First with fake/stub data.
 2. Then with Nokia CAMARA sandbox APIs.
 3. Then with AI story generation.
-4. Then with voice output.
+4. Then with free browser voice output.
 5. Then with polish for the demo.
 
 ## Step 1: Open The Project
@@ -61,7 +61,7 @@ This installs:
 - Qdrant client for the vector database.
 - LangGraph for agents.
 - Gemini for story generation.
-- ElevenLabs for voice.
+- Browser text-to-speech for free voice.
 - Pytest for tests.
 
 ## Step 4: Create Your Secret Keys File
@@ -81,7 +81,6 @@ NOKIA_API_KEY=your_nokia_key_here
 NOKIA_RAPIDAPI_HOST=network-as-code.nokia.rapidapi.com
 
 GEMINI_API_KEY=your_gemini_key_here
-ELEVENLABS_API_KEY=your_elevenlabs_key_here
 
 QDRANT_URL=http://localhost:6333
 ```
@@ -98,7 +97,7 @@ Visitor opens RawiAI
 -> Location Agent chooses the monument
 -> Q&A Agent retrieves heritage facts
 -> Gemini writes the answer or story
--> ElevenLabs creates audio
+-> Browser text-to-speech speaks the answer
 -> Route Agent checks congestion
 -> CAMARA QoD is requested for smooth playback
 ```
@@ -283,7 +282,7 @@ grounded in the facts
 
 Do not let Gemini invent historical facts. Tell it to only use the retrieved content.
 
-## Step 12: Connect ElevenLabs
+## Step 12: Connect Free Browser Voice
 
 Open:
 
@@ -294,21 +293,29 @@ app/audio/tts.py
 Find:
 
 ```python
-def text_to_speech(text: str, voice: str = "default") -> dict:
+def text_to_speech(text: str) -> dict:
 ```
 
-Replace the stub with a real ElevenLabs request.
+We are not using ElevenLabs for the free hackathon version.
 
-For the demo, the function should return:
+The app uses the browser's built-in Web Speech API instead.
+
+The function should return:
 
 ```python
 {
-    "audio_url": "...",
+    "provider": "browser-speech-synthesis",
     "status": "ready"
 }
 ```
 
-Then update the UI later to play this audio URL.
+The actual speaking happens in:
+
+```text
+app/ui/pages.py
+```
+
+The `Speak Story` button reads the answer text from the page and speaks it aloud.
 
 ## Step 13: CAMARA API Order
 
@@ -570,7 +577,7 @@ This function should:
 ```text
 check location
 generate story
-create audio
+prepare browser voice
 show route
 show QoD status
 ```
@@ -736,7 +743,7 @@ Click Start Heritage Story
 Show CAMARA location status
 Show landmark name
 Generate story
-Play voice
+Click Speak Story
 Ask one question
 Show congestion route change
 Show QoD status
@@ -761,4 +768,3 @@ Number Verification can make sign-in passwordless.
 
 The AI is not guessing context. It receives verified network context from CAMARA, then creates the right story for the right place.
 ```
-
