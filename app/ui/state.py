@@ -18,6 +18,10 @@ class RawiState(rx.State):
     current_site: str = ""
     geofence_status: str = ""
     route_reason: str = ""
+    story_source: str = ""
+    camara_calls: str = ""
+    flow_summary: str = ""
+    timeline: str = ""
 
     def set_language(self, language: str):
         self.language = language
@@ -31,6 +35,10 @@ class RawiState(rx.State):
         self.current_site = result["location"]["near_monument"]
         self.answer = result["qa"]["answer"]
         self.route = result["route"]["route"]
+        self.story_source = result["qa"]["source"]
+        self.camara_calls = " -> ".join(result["camara_calls"])
+        self.flow_summary = result["summary"]
+        self.timeline = " | ".join(item["step"] for item in result["timeline"])
         self.camara_status = (
             f"Identity: {result['identity']['source']} | "
             f"Location: {result['location']['verification']['source']} | "
