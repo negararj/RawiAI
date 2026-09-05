@@ -301,11 +301,12 @@ def story_card():
             },
         ),
         rx.el.p(RawiState.language, id="rawi-language", style={"display": "none"}),
-        rx.el.button(
-            rx.icon(tag="volume-2", size=14, color=RUST),
-            rx.el.span("Speak Story", style={"font_size": "13px", "font_weight": "600", "color": RUST}),
-            on_click=rx.call_script(
-                """
+        rx.el.div(
+            rx.el.button(
+                rx.icon(tag="volume-2", size=14, color="white"),
+                rx.el.span("Speak Story", style={"font_size": "13px", "font_weight": "600", "color": "white"}),
+                on_click=rx.call_script(
+                    """
 const text = document.getElementById("rawi-answer")?.innerText || "";
 const language = document.getElementById("rawi-language")?.innerText || "en";
 if (text.trim()) {
@@ -315,18 +316,34 @@ if (text.trim()) {
   window.speechSynthesis.speak(utterance);
 }
 """
+                ),
+                style={
+                    "display": "flex",
+                    "align_items": "center",
+                    "gap": "6px",
+                    "padding": "9px 14px",
+                    "border_radius": "999px",
+                    "border": "none",
+                    "background": RUST,
+                    "cursor": "pointer",
+                },
             ),
-            style={
-                "display": "flex",
-                "align_items": "center",
-                "gap": "6px",
-                "margin_top": "14px",
-                "padding": "9px 14px",
-                "border_radius": "999px",
-                "border": f"1px solid {RUST}",
-                "background": "transparent",
-                "cursor": "pointer",
-            },
+            rx.el.button(
+                rx.icon(tag="square", size=14, color=RUST),
+                rx.el.span("Stop", style={"font_size": "13px", "font_weight": "600", "color": RUST}),
+                on_click=rx.call_script("window.speechSynthesis.cancel();"),
+                style={
+                    "display": "flex",
+                    "align_items": "center",
+                    "gap": "6px",
+                    "padding": "9px 14px",
+                    "border_radius": "999px",
+                    "border": f"1px solid {RUST}",
+                    "background": "transparent",
+                    "cursor": "pointer",
+                },
+            ),
+            style={"display": "flex", "gap": "10px", "margin_top": "14px"},
         ),
         rx.el.p(
             f"Source: {RawiState.story_source}",
