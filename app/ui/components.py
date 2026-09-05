@@ -1,7 +1,10 @@
 """Reusable, styled Reflex UI components for RawiAI."""
 
+import json
+
 import reflex as rx
 
+from app.agents.sites import AL_HISN_FORT, AL_HISN_FORT_ALT_ENTRANCE
 from app.ui.state import RawiState
 
 # ---------------------------------------------------------------------------
@@ -369,6 +372,91 @@ def congestion_badge():
     )
 
 
+_ROUTE_MAP_SCRIPT_TEMPLATE = """
+(function() {
+  function initMap() {
+    if (window.__rawiMapInited) return;
+    var el = document.getElementById("rawi-route-map");
+    if (!el || typeof L === "undefined") return;
+    window.__rawiMapInited = true;
+
+    var main = [__MAIN_LAT__, __MAIN_LON__];
+    var alt = [__ALT_LAT__, __ALT_LON__];
+
+    var map = L.map(el, { zoomControl: false }).setView(main, 17);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    L.marker(main).addTo(map).bindPopup(__MAIN_LABEL__);
+    L.marker(alt).addTo(map).bindPopup(__ALT_LABEL__);
+    map.fitBounds(L.latLngBounds([main, alt]), { padding: [24, 24] });
+
+    fetch("https://router.project-osrm.org/route/v1/foot/" + main[1] + "," + main[0] + ";" + alt[1] + "," + alt[0] + "?overview=full&geometries=geojson")
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.routes && data.routes[0]) {
+          var coords = data.routes[0].geometry.coordinates.map(function(c) { return [c[1], c[0]]; });
+          L.polyline(coords, { color: "__ROUTE_COLOR__", weight: 4, opacity: 0.85 }).addTo(map);
+        }
+      })
+      .catch(function() {});
+  }
+
+  if (typeof L !== "undefined") {
+    initMap();
+    return;
+  }
+  if (!window.__rawiLeafletLoading) {
+    window.__rawiLeafletLoading = true;
+    var script = document.createElement("script");
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onload = initMap;
+    document.head.appendChild(script);
+  } else {
+    var tries = 0;
+    var interval = setInterval(function() {
+      tries += 1;
+      if (typeof L !== "undefined") {
+        clearInterval(interval);
+        initMap();
+      } else if (tries > 40) {
+        clearInterval(interval);
+      }
+    }, 250);
+  }
+})();
+"""
+
+
+def route_map():
+    """A small live OpenStreetMap showing the main entrance, the quieter
+    alternate entrance, and a walking route between them (via OSRM)."""
+    script = (
+        _ROUTE_MAP_SCRIPT_TEMPLATE.replace("__MAIN_LAT__", str(AL_HISN_FORT["lat"]))
+        .replace("__MAIN_LON__", str(AL_HISN_FORT["lon"]))
+        .replace("__ALT_LAT__", str(AL_HISN_FORT_ALT_ENTRANCE["lat"]))
+        .replace("__ALT_LON__", str(AL_HISN_FORT_ALT_ENTRANCE["lon"]))
+        .replace("__MAIN_LABEL__", json.dumps(AL_HISN_FORT["name"]))
+        .replace("__ALT_LABEL__", json.dumps(AL_HISN_FORT_ALT_ENTRANCE["name"]))
+        .replace("__ROUTE_COLOR__", RUST)
+    )
+
+    return rx.el.div(
+        rx.el.div(
+            id="rawi-route-map",
+            style={
+                "width": "100%",
+                "height": "180px",
+                "border_radius": "14px",
+                "overflow": "hidden",
+                "margin_top": "12px",
+                "background": SAND,
+            },
+        ),
+        rx.script(script),
+        style={"width": "100%"},
+    )
+
+
 def route_card():
     return card(
         rx.el.div(
@@ -382,8 +470,9 @@ def route_card():
         ),
         rx.el.p(
             RawiState.route_reason,
-            style={"font_size": "12px", "color": INK_SOFT, "margin": "6px 0 0 0", "line-height": "1.5"},
+            style={"font_size": "12px", "color": INK_SOFT, "margin": "6px 0 0 0", "line_height": "1.5"},
         ),
+        route_map(),
     )
 
 

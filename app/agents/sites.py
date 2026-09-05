@@ -9,6 +9,12 @@ AL_HISN_FORT = {
     "radius_meters": 150,
 }
 
+AL_HISN_FORT_ALT_ENTRANCE = {
+    "name": "Al Hisn Fort - East Entrance (quieter path)",
+    "lat": 25.3578,
+    "lon": 55.3835,
+}
+
 
 DEMO_SITES = {
     AL_HISN_FORT["id"]: AL_HISN_FORT,
