@@ -1,0 +1,9 @@
+reflex
+network_as_code
+qdrant-client
+langgraph
+google-generativeai
+elevenlabs
+python-dotenv
+pytest
+
