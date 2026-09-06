@@ -124,6 +124,8 @@ _STRINGS = {
     ),
     "install_title": ("Install RawiAI", "ثبّت راوي"),
     "install_button": ("Install", "تثبيت"),
+    "notify_me": ("Alert me on arrival", "نبّهني عند الوصول"),
+    "watching": ("Watching for arrival...", "يراقب وصولك..."),
     "footer": (
         "DevNull · Immersive Tourism & Smart Cities · Nokia CAMARA Hackathon",
         "DevNull · السياحة الغامرة والمدن الذكية · هاكاثون نوكيا CAMARA",
@@ -319,6 +321,126 @@ def trust_rail():
         trust_chip("radio-tower", t("network"), RawiState.step_network),
         trust_chip("gauge", t("qod"), RawiState.step_qos),
         style={"display": "flex", "gap": "8px", "width": "100%"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Arrival alert — client-side geolocation watch that pops a native
+# notification when the visitor's phone GPS enters the site radius. This is
+# the on-device complement to the network-side CAMARA geofencing: CAMARA
+# proves presence to the backend, this gives the visitor an immediate nudge.
+# ---------------------------------------------------------------------------
+
+_ARRIVAL_WATCH_SCRIPT_TEMPLATE = """
+(function() {
+  function haversineMeters(lat1, lon1, lat2, lon2) {
+    var R = 6371000;
+    var toRad = function(d) { return (d * Math.PI) / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function notifyArrival() {
+    var title = "__NOTIFY_TITLE__";
+    var body = "__NOTIFY_BODY__";
+    if (window.Notification && Notification.permission === "granted") {
+      var n = new Notification(title, { body: body, icon: "/rawiai-icon.svg" });
+      n.onclick = function() {
+        window.focus();
+        n.close();
+      };
+    } else {
+      alert(title + ": " + body);
+    }
+  }
+
+  window.rawiStopArrivalWatch = function() {
+    if (window.__rawiWatchId != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(window.__rawiWatchId);
+      window.__rawiWatchId = null;
+    }
+  };
+
+  window.rawiStartArrivalWatch = function() {
+    if (!("geolocation" in navigator)) {
+      alert("Geolocation is not available on this device or browser.");
+      return;
+    }
+
+    var begin = function() {
+      window.__rawiArrivalFired = false;
+      window.__rawiWatchId = navigator.geolocation.watchPosition(
+        function(pos) {
+          var distance = haversineMeters(
+            pos.coords.latitude,
+            pos.coords.longitude,
+            __SITE_LAT__,
+            __SITE_LON__
+          );
+          if (distance <= __SITE_RADIUS__ && !window.__rawiArrivalFired) {
+            window.__rawiArrivalFired = true;
+            notifyArrival();
+          }
+        },
+        function(err) {
+          console.log("RawiAI geolocation error:", err);
+        },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      );
+    };
+
+    if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission().then(begin);
+    } else {
+      begin();
+    }
+  };
+})();
+"""
+
+
+def arrival_watch_script():
+    script = (
+        _ARRIVAL_WATCH_SCRIPT_TEMPLATE.replace("__SITE_LAT__", str(AL_HISN_FORT["lat"]))
+        .replace("__SITE_LON__", str(AL_HISN_FORT["lon"]))
+        .replace("__SITE_RADIUS__", str(AL_HISN_FORT["radius_meters"]))
+        .replace("__NOTIFY_TITLE__", "Rawi AI")
+        .replace(
+            "__NOTIFY_BODY__",
+            f"You've arrived at {AL_HISN_FORT['name']} — tap to hear its story.",
+        )
+    )
+    return rx.script(script)
+
+
+def arrival_alert_button():
+    active = RawiState.arrival_watch_enabled
+    return rx.el.button(
+        rx.icon(tag=rx.cond(active, "bell-ring", "bell"), size=14, color=rx.cond(active, "white", TEAL)),
+        rx.el.span(
+            rx.cond(active, t("watching"), t("notify_me")),
+            style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600"},
+        ),
+        on_click=RawiState.toggle_arrival_watch,
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "justify_content": "center",
+            "gap": "6px",
+            "width": "100%",
+            "padding": "10px",
+            "margin_top": "10px",
+            "border_radius": "12px",
+            "border": f"1px solid {rx.cond(active, TEAL, LINE)}",
+            "background": rx.cond(active, TEAL, SAND),
+            "color": rx.cond(active, "white", TEAL),
+            "cursor": "pointer",
+            "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+        },
     )
 
 

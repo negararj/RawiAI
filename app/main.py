@@ -1,8 +1,15 @@
 """Reflex app entry point."""
 
+import logging
+
 import reflex as rx
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from app.ui.pages import index
+from app.webhooks.geofence_events import receive_geofence_event
+
+logger = logging.getLogger(__name__)
 
 
 app = rx.App(
@@ -16,6 +23,24 @@ app = rx.App(
     ],
     style={"font_family": "'Tajawal', sans-serif"},
 )
+async def _geofence_webhook(request: Request) -> JSONResponse:
+    """Receive CAMARA geofencing CloudEvents from Nokia's network.
+
+    Registered directly on the Starlette ASGI app since Reflex's App does
+    not expose a public API for adding custom HTTP routes.
+    """
+    payload = await request.json()
+    result = receive_geofence_event(payload)
+    logger.info("Received CAMARA geofence event: %s", result)
+    return JSONResponse(result)
+
+
+@app.register_lifespan_task
+async def _register_custom_routes():
+    if app._api is not None:
+        app._api.add_route("/geofence", _geofence_webhook, methods=["POST"])
+
+
 app.add_page(
     index,
     route="/",

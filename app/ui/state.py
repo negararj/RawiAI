@@ -37,6 +37,14 @@ class RawiState(rx.State):
     camara_calls: list[str] = []
     timeline: list[dict[str, str]] = []
 
+    arrival_watch_enabled: bool = False
+
+    def toggle_arrival_watch(self):
+        self.arrival_watch_enabled = not self.arrival_watch_enabled
+        if self.arrival_watch_enabled:
+            return rx.call_script("window.rawiStartArrivalWatch && window.rawiStartArrivalWatch();")
+        return rx.call_script("window.rawiStopArrivalWatch && window.rawiStopArrivalWatch();")
+
     def set_language(self, language: str):
         self.language = language
 

@@ -6,6 +6,8 @@ from app.ui.components import (
     FONT_BODY,
     INK_SOFT,
     SAND,
+    arrival_alert_button,
+    arrival_watch_script,
     ask_card,
     brand_header,
     hero,
@@ -61,6 +63,7 @@ def index():
             brand_header(),
             hero(),
             trust_rail(),
+            arrival_alert_button(),
             ask_card(),
             rx.cond(
                 RawiState.started,
@@ -101,5 +104,6 @@ window.addEventListener("beforeinstallprompt", (event) => {
 });
 """
         ),
+        arrival_watch_script(),
         style=PAGE_STYLE,
     )
