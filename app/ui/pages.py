@@ -33,6 +33,47 @@ _PATTERN_SVG = (
     "</g></svg>"
 )
 
+# A fort-wall battlement silhouette, tiled along the bottom of the viewport -
+# echoes the fortress/skyline artwork on the pitch deck's title slide.
+_BATTLEMENT_SVG = (
+    "data:image/svg+xml;utf8,"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='24'>"
+    "<path d='M0 24 L0 8 L4 8 L4 3 L8 3 L8 8 L12 8 L12 3 L16 3 L16 8 L20 8 L20 24 Z' "
+    "fill='%23AE5A2E' opacity='0.5'/></svg>"
+)
+
+# A single dome + minaret silhouette, centered above the battlements - the
+# same skyline motif as the deck's title-slide illustration. The dome arc
+# radius equals half its base width, so it forms an exact semicircle
+# springing from y=30 up to a peak at y=7 - kept clear of the canvas edge.
+_DOME_SVG = (
+    "data:image/svg+xml;utf8,"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='70' height='50'>"
+    "<path d='M12 48 L12 30 A23 23 0 0 1 58 30 L58 48 Z' fill='%23AE5A2E' opacity='0.4'/>"
+    "<rect x='32' y='2' width='6' height='8' fill='%23AE5A2E' opacity='0.4'/>"
+    "<circle cx='35' cy='2' r='2' fill='%23AE5A2E' opacity='0.4'/></svg>"
+)
+
+
+def skyline_bar():
+    """A fixed heritage skyline (fort battlements + a dome) along the
+    bottom of the viewport, drawn from the pitch deck's title-slide art."""
+    return rx.el.div(
+        style={
+            "position": "fixed",
+            "bottom": "0",
+            "left": "0",
+            "width": "100%",
+            "height": "40px",
+            "background_image": f"url(\"{_DOME_SVG}\"), url(\"{_BATTLEMENT_SVG}\")",
+            "background_repeat": "no-repeat, repeat-x",
+            "background_position": "center bottom, bottom",
+            "background_size": "56px 40px, 40px 24px",
+            "pointer_events": "none",
+            "z_index": "0",
+        }
+    )
+
 PAGE_STYLE = {
     "min_height": "100vh",
     "width": "100%",
@@ -54,6 +95,9 @@ SHELL_STYLE = {
     "display": "flex",
     "flex_direction": "column",
     "gap": "16px",
+    "position": "relative",
+    "z_index": "1",
+    "padding_bottom": "24px",
 }
 
 
@@ -105,5 +149,6 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
+        skyline_bar(),
         style=PAGE_STYLE,
     )
