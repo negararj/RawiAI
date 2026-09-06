@@ -4,7 +4,14 @@ import reflex as rx
 
 from app.ui.components import (
     FONT_BODY,
+    FONT_HEADING,
+    GOLD,
+    INK,
     INK_SOFT,
+    SKY_MINT,
+    TEAL,
+    TEAL_DEEP,
+    TEAL_SOFT,
     arrival_alert_button,
     arrival_watch_script,
     ask_card,
@@ -82,11 +89,100 @@ def background_lanterns():
             "z_index": "0",
         }
         style[side] = "4%"
+        style["animation"] = "rawiSway 5s ease-in-out infinite"
+        style["transform_origin"] = "top center"
         return rx.el.div(style=style)
 
     return rx.el.div(
         lantern("left"),
         lantern("right"),
+    )
+
+
+_GLOBAL_ANIMATIONS = """
+<style>
+@keyframes rawiSway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes rawiSplashOut {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes rawiPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+</style>
+"""
+
+
+def splash_screen():
+    """A brief map-and-journey themed splash shown while the app boots,
+    fading out on its own via a fixed-duration CSS animation - no need to
+    hook into the backend connection lifecycle."""
+    return rx.el.div(
+        rx.icon(
+            tag="compass",
+            size=30,
+            color=TEAL_DEEP,
+            style={"position": "absolute", "top": "10%", "right": "12%", "opacity": "0.8"},
+        ),
+        rx.icon(
+            tag="anchor",
+            size=24,
+            color=INK,
+            style={"position": "absolute", "bottom": "12%", "right": "16%", "opacity": "0.7"},
+        ),
+        rx.el.svg(
+            rx.el.path(
+                d="M20 20 Q40 40 20 60 Q0 80 30 90",
+                stroke=INK,
+                stroke_width="2",
+                fill="none",
+                stroke_dasharray="4,5",
+            ),
+            rx.el.line(x1="26", y1="86", x2="34", y2="94", stroke=INK, stroke_width="2"),
+            rx.el.line(x1="34", y1="86", x2="26", y2="94", stroke=INK, stroke_width="2"),
+            view_box="0 0 100 100",
+            width="70",
+            height="70",
+            style={"position": "absolute", "top": "14%", "left": "10%", "opacity": "0.7"},
+        ),
+        rx.el.div(
+            rx.el.p("راوي", style={"font_family": FONT_HEADING, "font_size": "16px", "color": TEAL_DEEP, "margin": "0"}),
+            rx.el.h1(
+                "RAWI AI",
+                style={
+                    "font_family": FONT_HEADING,
+                    "font_size": "32px",
+                    "font_weight": "700",
+                    "color": INK,
+                    "margin": "4px 0 0 0",
+                    "letter_spacing": "1px",
+                },
+            ),
+            style={
+                "background": TEAL_SOFT,
+                "padding": "28px 40px",
+                "border_radius": "18px",
+                "transform": "rotate(-2deg)",
+                "box_shadow": "0 10px 30px rgba(15, 74, 69, 0.25)",
+                "text_align": "center",
+            },
+        ),
+        id="rawi-splash",
+        style={
+            "position": "fixed",
+            "inset": "0",
+            "z_index": "9999",
+            "display": "flex",
+            "align_items": "center",
+            "justify_content": "center",
+            "background": f"{SKY_MINT} url(\"{_PATTERN_SVG}\")",
+            "background_size": "84px 84px",
+            "animation": "rawiSplashOut 0.6s ease 1.4s forwards",
+        },
     )
 
 # A fort-wall battlement silhouette, tiled along the bottom of the viewport -
@@ -224,5 +320,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
         arrival_watch_script(),
         background_lanterns(),
         skyline_bar(),
+        rx.html(_GLOBAL_ANIMATIONS),
+        splash_screen(),
         style=PAGE_STYLE,
     )

@@ -21,6 +21,13 @@ TEAL_SOFT = "#E1EFEC"
 GOLD = "#C08A2E"
 GOLD_SOFT = "#EADFC0"
 
+# A per-landmark "sky wave" palette, inspired by editorial flat-illustration
+# travel art (wavy horizontal sky bands over warm architecture).
+SKY_BLUE = "#7FA6B8"
+SKY_ROSE = "#E3A9A0"
+SKY_PEACH = "#F5DCC0"
+SKY_MINT = "#D8ECE6"
+
 FONT_HEADING = "'Reem Kufi', 'Tajawal', sans-serif"
 FONT_BODY = "'Tajawal', 'Cairo', sans-serif"
 FONT_STORY = "'Amiri', 'Tajawal', serif"
@@ -646,6 +653,11 @@ def ask_card():
                 "cursor": rx.cond(RawiState.is_loading, "default", "pointer"),
                 "opacity": rx.cond(RawiState.is_loading, "0.75", "1"),
                 "box_shadow": "0 8px 18px rgba(174, 90, 46, 0.35)",
+                "animation": rx.cond(
+                    RawiState.is_loading | RawiState.started,
+                    "none",
+                    "rawiPulse 2.5s ease-in-out infinite",
+                ),
             },
         ),
         rx.el.div(
@@ -752,9 +764,18 @@ _ILLUSTRATION_VIEWBOX = "0 0 320 150"
 _DOME_PATH = "M12 48 L12 30 A23 23 0 0 1 58 30 L58 48 Z"
 
 
-def _illustration_frame(*children):
+def _wave(y: int, amplitude: int, color: str, opacity: float = 0.85, width: int = 9):
+    """A thick, rounded wavy stroke spanning the canvas width - a smooth
+    continuous S-curve built from one quadratic segment (Q) plus repeated
+    smooth continuations (T), the standard reliable SVG sine-wave recipe."""
+    d = f"M-20 {y} Q20 {y - amplitude} 60 {y} T140 {y} T220 {y} T300 {y} T380 {y}"
+    return rx.el.path(d=d, stroke=color, stroke_width=str(width), fill="none", opacity=str(opacity), stroke_linecap="round")
+
+
+def _illustration_frame(sky_bg: str, waves: list, *children):
     return rx.el.svg(
-        rx.el.rect(x="0", y="0", width="320", height="150", fill=TEAL_SOFT),
+        rx.el.rect(x="0", y="0", width="320", height="150", fill=sky_bg),
+        *waves,
         rx.el.line(x1="0", y1="130", x2="320", y2="130", stroke=LINE, stroke_width="2"),
         *children,
         view_box=_ILLUSTRATION_VIEWBOX,
@@ -771,6 +792,8 @@ def al_hisn_fort_illustration():
         for x in merlon_x
     ]
     return _illustration_frame(
+        SKY_MINT,
+        [_wave(18, 6, SKY_BLUE), _wave(30, 5, SKY_ROSE, opacity=0.7), _wave(42, 4, SKY_BLUE, opacity=0.5)],
         rx.el.rect(x="40", y="90", width="60", height="40", fill=RUST_DARK, opacity="0.75"),
         rx.el.rect(x="220", y="90", width="60", height="40", fill=RUST_DARK, opacity="0.75"),
         rx.el.rect(x="110", y="50", width="100", height="80", fill=RUST),
@@ -796,17 +819,21 @@ def qasr_al_hosn_illustration():
         )
 
     return _illustration_frame(
+        SKY_PEACH,
+        [_wave(16, 5, GOLD, opacity=0.6), _wave(26, 6, SKY_ROSE), _wave(38, 4, GOLD, opacity=0.45)],
         rx.el.rect(x="60", y="90", width="35", height="40", fill=RUST_DARK, opacity="0.75"),
         rx.el.rect(x="225", y="90", width="35", height="40", fill=RUST_DARK, opacity="0.75"),
         rx.el.rect(x="100", y="70", width="120", height="60", fill=RUST),
         dome_group(42.5, 42, 1),
         dome_group(207.5, 42, 1),
-        dome_group(90, -26, 2),
+        dome_group(90, 10, 2),
     )
 
 
 def al_fahidi_illustration():
     return _illustration_frame(
+        SKY_MINT,
+        [_wave(16, 5, TEAL, opacity=0.55), _wave(28, 6, SKY_BLUE), _wave(40, 4, TEAL, opacity=0.4)],
         rx.el.rect(x="60", y="90", width="70", height="40", fill=RUST_DARK, opacity="0.75"),
         rx.el.rect(x="85", y="30", width="20", height="60", fill=RUST_DARK),
         rx.el.line(x1="90", y1="35", x2="90", y2="85", stroke=GOLD_SOFT, stroke_width="2"),
