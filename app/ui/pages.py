@@ -5,7 +5,6 @@ import reflex as rx
 from app.ui.components import (
     FONT_BODY,
     INK_SOFT,
-    SAND,
     arrival_alert_button,
     arrival_watch_script,
     ask_card,
@@ -27,16 +26,68 @@ from app.ui.components import (
 )
 from app.ui.state import RawiState
 
-# A faint eight-point-star lattice (rub el hizb motif), tiled behind the
-# radial gradient - a quiet nod to Islamic geometric pattern work.
+# An interlocking-circles lattice - the classic Islamic geometric motif seen
+# on the pitch deck's backgrounds. Circles centered at each tile corner
+# (radius = half the tile size) plus one centered in the tile connect
+# seamlessly with their neighbors when repeated, weaving into a continuous
+# mesh rather than a grid of separate rings.
 _PATTERN_SVG = (
     "data:image/svg+xml;utf8,"
-    "<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'>"
-    "<g fill='none' stroke='%23C08A2E' stroke-width='1' opacity='0.14'>"
-    "<rect x='12' y='12' width='24' height='24'/>"
-    "<rect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/>"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'>"
+    "<g fill='none' stroke='%23C08A2E' stroke-width='1.5' opacity='0.22'>"
+    "<circle cx='0' cy='0' r='42'/>"
+    "<circle cx='84' cy='0' r='42'/>"
+    "<circle cx='0' cy='84' r='42'/>"
+    "<circle cx='84' cy='84' r='42'/>"
+    "<circle cx='42' cy='42' r='42'/>"
     "</g></svg>"
 )
+
+# A hanging fanous (lantern) for the page corners - same shapes as the
+# header's lantern_mark, shifted down to make room for a chain and a small
+# crescent moon finial above, matching the deck's title-slide artwork.
+_BACKGROUND_LANTERN_SVG = (
+    "data:image/svg+xml;utf8,"
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'>"
+    "<line x1='12' y1='0' x2='12' y2='6' stroke='%23C08A2E' stroke-width='1' stroke-dasharray='1,2'/>"
+    "<circle cx='12' cy='7' r='2' fill='%23C08A2E'/>"
+    "<path d='M9 11h6v3H9z' fill='%23C08A2E'/>"
+    "<path d='M7 14h10l-1.5 3h-7z' fill='%231F7A72'/>"
+    "<rect x='7.5' y='17' width='9' height='9' rx='1.5' fill='%231F7A72'/>"
+    "<path d='M8 17.5 L16 17.5' stroke='%23EADFC0' stroke-width='0.6'/>"
+    "<path d='M8 21 L16 21' stroke='%23EADFC0' stroke-width='0.6'/>"
+    "<path d='M8 24.5 L16 24.5' stroke='%23EADFC0' stroke-width='0.6'/>"
+    "<path d='M9 26h6l-1.5 2.5h-3z' fill='%23C08A2E'/>"
+    "<circle cx='12' cy='29.5' r='1' fill='%23C08A2E'/>"
+    "</svg>"
+)
+
+
+def background_lanterns():
+    """Large decorative lanterns hanging from the top corners, behind the
+    card - purely a page-background flourish, matching the deck's title
+    slide. Hidden behind the (opaque) card on narrow phones; visible in the
+    margins on wider screens."""
+    def lantern(side):
+        style = {
+            "position": "fixed",
+            "top": "0",
+            "width": "110px",
+            "height": "147px",
+            "background_image": f"url(\"{_BACKGROUND_LANTERN_SVG}\")",
+            "background_repeat": "no-repeat",
+            "background_size": "contain",
+            "opacity": "0.6",
+            "pointer_events": "none",
+            "z_index": "0",
+        }
+        style[side] = "4%"
+        return rx.el.div(style=style)
+
+    return rx.el.div(
+        lantern("left"),
+        lantern("right"),
+    )
 
 # A fort-wall battlement silhouette, tiled along the bottom of the viewport -
 # echoes the fortress/skyline artwork on the pitch deck's title slide.
@@ -84,12 +135,9 @@ PAGE_STYLE = {
     "width": "100%",
     "display": "flex",
     "justify_content": "center",
-    "background": (
-        f"radial-gradient(circle at 15% 0%, #F3E3C9 0%, {SAND} 45%, #E7EFEB 100%), "
-        f"url(\"{_PATTERN_SVG}\")"
-    ),
-    "background_repeat": "no-repeat, repeat",
-    "background_size": "cover, 48px 48px",
+    "background": f"#F7ECD8 url(\"{_PATTERN_SVG}\")",
+    "background_repeat": "repeat",
+    "background_size": "84px 84px",
     "padding": "32px 16px",
     "box_sizing": "border-box",
 }
@@ -174,6 +222,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
+        background_lanterns(),
         skyline_bar(),
         style=PAGE_STYLE,
     )
