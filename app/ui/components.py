@@ -102,6 +102,11 @@ _STRINGS = {
     "question_placeholder": ("Ask about this place...", "اسأل عن هذا المكان..."),
     "begin_story": ("Begin the Story", "ابدأ الحكاية"),
     "listening": ("Listening to the network...", "يستمع إلى الشبكة..."),
+    "voice_listening": ("Listening...", "أستمع..."),
+    "voice_not_supported": (
+        "Voice input isn't supported in this browser.",
+        "الإدخال الصوتي غير مدعوم في هذا المتصفح.",
+    ),
     "current_site": ("Current Site", "الموقع الحالي"),
     "story": ("Story", "الحكاية"),
     "speak_story": ("Speak Story", "اروِ الحكاية"),
@@ -545,6 +550,31 @@ def arrival_alert_button():
 
 
 # ---------------------------------------------------------------------------
+# Voice input - speak the question instead of typing it
+# ---------------------------------------------------------------------------
+
+
+def voice_input_button():
+    active = RawiState.is_listening
+    return rx.el.button(
+        rx.icon(tag="mic", size=16, color=rx.cond(active, "white", RUST)),
+        on_click=RawiState.start_voice_input,
+        disabled=active,
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "justify_content": "center",
+            "width": "44px",
+            "flex_shrink": "0",
+            "border": f"1px solid {rx.cond(active, RUST, LINE)}",
+            "border_radius": "12px",
+            "background": rx.cond(active, RUST, SAND),
+            "cursor": "pointer",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Ask card
 # ---------------------------------------------------------------------------
 
@@ -562,25 +592,36 @@ def ask_card():
                 "text_align": RawiState.text_align,
             },
         ),
-        rx.el.input(
-            value=RawiState.question,
-            on_change=RawiState.set_question,
-            placeholder=t("question_placeholder"),
-            dir=RawiState.dir,
+        rx.el.div(
+            rx.el.input(
+                value=RawiState.question,
+                on_change=RawiState.set_question,
+                placeholder=t("question_placeholder"),
+                dir=RawiState.dir,
+                style={
+                    "font_family": FONT_BODY,
+                    "flex": "1",
+                    "min_width": "0",
+                    "padding": "12px 14px",
+                    "border_radius": "12px",
+                    "border": f"1px solid {LINE}",
+                    "background": SAND,
+                    "font_size": "14px",
+                    "color": INK,
+                    "outline": "none",
+                    "box_sizing": "border-box",
+                    "text_align": RawiState.text_align,
+                },
+            ),
+            voice_input_button(),
             style={
-                "font_family": FONT_BODY,
+                "display": "flex",
+                "gap": "8px",
                 "width": "100%",
-                "padding": "12px 14px",
-                "border_radius": "12px",
-                "border": f"1px solid {LINE}",
-                "background": SAND,
-                "font_size": "14px",
-                "color": INK,
-                "outline": "none",
-                "box_sizing": "border-box",
-                "text_align": RawiState.text_align,
+                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
             },
         ),
+        rx.el.span(RawiState.language, id="rawi-language", style={"display": "none"}),
         rx.el.button(
             rx.cond(RawiState.is_loading, t("listening"), t("begin_story")),
             on_click=RawiState.start_demo,
@@ -853,9 +894,8 @@ def story_card():
                 "min_height": "90px",
             },
         ),
-        story_pager(),
+        rx.cond(RawiState.story_page_count > 1, story_pager()),
         rx.el.p(RawiState.answer, id="rawi-answer", style={"display": "none"}),
-        rx.el.p(RawiState.language, id="rawi-language", style={"display": "none"}),
         rx.el.div(
             rx.el.button(
                 rx.icon(tag="volume-2", size=14, color="white"),

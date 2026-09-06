@@ -8,6 +8,46 @@ import reflex as rx
 from app.agents.graph import run_demo_flow
 from app.agents.sites import DEFAULT_SITE_ID, DEMO_SITES, get_site
 
+# Resolves to the transcript (or "" on any failure/no-support), so
+# rx.call_script's Promise-awaiting behavior hands the callback a plain
+# string either way.
+_VOICE_INPUT_SCRIPT = """
+(function() {
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    return Promise.resolve("");
+  }
+  return new Promise(function(resolve) {
+    var langEl = document.getElementById("rawi-language");
+    var lang = (langEl && langEl.innerText === "ar") ? "ar-SA" : "en-US";
+    var recognition = new SpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    var done = false;
+    var finish = function(value) {
+      if (done) return;
+      done = true;
+      resolve(value);
+    };
+    recognition.onresult = function(event) {
+      finish(event.results[0][0].transcript);
+    };
+    recognition.onerror = function() {
+      finish("");
+    };
+    recognition.onend = function() {
+      finish("");
+    };
+    try {
+      recognition.start();
+    } catch (e) {
+      finish("");
+    }
+  });
+})()
+"""
+
 
 class RawiState(rx.State):
     """State shared by the mobile UI."""
@@ -27,6 +67,7 @@ class RawiState(rx.State):
 
     started: bool = False
     is_loading: bool = False
+    is_listening: bool = False
 
     # Trust-layer chips (CAMARA signals), revealed in sequence for the demo.
     step_identity: bool = False
@@ -62,6 +103,15 @@ class RawiState(rx.State):
 
     def set_question(self, question: str):
         self.question = question
+
+    def start_voice_input(self):
+        self.is_listening = True
+        return rx.call_script(_VOICE_INPUT_SCRIPT, callback=RawiState.finish_voice_input)
+
+    def finish_voice_input(self, transcript: str):
+        self.is_listening = False
+        if transcript:
+            self.question = transcript
 
     @rx.var
     def is_ar(self) -> bool:
@@ -177,10 +227,23 @@ class RawiState(rx.State):
 
     @rx.var
     def story_pages(self) -> list[str]:
-        pages = [p.strip() for p in self.answer.split("\n\n") if p.strip()]
-        if pages:
+        text = self.answer.strip()
+        if not text:
+            return []
+
+        # Prefer blank-line paragraph breaks. Gemini doesn't always use them
+        # (seen with some Arabic responses that come back as one block with
+        # single newlines instead), so fall back to single newlines, and
+        # only treat it as one page if there's truly no break at all.
+        pages = [p.strip() for p in text.split("\n\n") if p.strip()]
+        if len(pages) > 1:
             return pages
-        return [self.answer] if self.answer else []
+
+        pages = [p.strip() for p in text.split("\n") if p.strip()]
+        if len(pages) > 1:
+            return pages
+
+        return [text]
 
     @rx.var
     def story_page_count(self) -> int:
