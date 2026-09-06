@@ -11,6 +11,7 @@ from app.ui.components import (
     ask_card,
     brand_header,
     browse_tab,
+    camara_tab,
     favorites_tab,
     hero,
     install_card,
@@ -22,7 +23,6 @@ from app.ui.components import (
     story_card,
     t,
     tab_bar,
-    timeline_card,
     trust_rail,
 )
 from app.ui.state import RawiState
@@ -127,7 +127,6 @@ def explore_tab():
                     story_card(),
                     route_card(),
                     network_card(),
-                    timeline_card(),
                     style={"display": "flex", "flex_direction": "column", "gap": "16px"},
                 ),
             ),
@@ -144,6 +143,7 @@ def index():
             rx.cond(RawiState.active_tab == "explore", explore_tab()),
             rx.cond(RawiState.active_tab == "browse", browse_tab()),
             rx.cond(RawiState.active_tab == "favorites", favorites_tab()),
+            rx.cond(RawiState.active_tab == "camara", camara_tab()),
             install_card(),
             rx.el.p(
                 t("footer"),

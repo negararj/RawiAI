@@ -131,6 +131,11 @@ _STRINGS = {
     "tab_explore": ("Explore", "استكشف"),
     "tab_browse": ("Browse", "تصفّح"),
     "tab_favorites": ("Favorites", "المفضلة"),
+    "tab_camara": ("CAMARA", "CAMARA"),
+    "no_camara_data": (
+        "Run a story from the Explore tab to see its CAMARA verification trail here.",
+        "ابدأ حكاية من تبويب استكشف لترى هنا مسار التحقق عبر CAMARA.",
+    ),
     "exploring": ("Exploring", "تستكشف"),
     "select_country": ("Country", "الدولة"),
     "select_city": ("City", "المدينة"),
@@ -341,6 +346,7 @@ def tab_bar():
         tab_button("explore", "compass", "tab_explore"),
         tab_button("browse", "map", "tab_browse"),
         tab_button("favorites", "heart", "tab_favorites"),
+        tab_button("camara", "shield-check", "tab_camara"),
         style={
             "display": "flex",
             "gap": "6px",
@@ -1188,6 +1194,26 @@ def timeline_card():
             },
         ),
         rx.el.div(rx.foreach(RawiState.timeline, row), style={"width": "100%"}),
+    )
+
+
+def camara_tab():
+    return rx.el.div(
+        rx.cond(
+            RawiState.timeline.length() > 0,
+            timeline_card(),
+            rx.el.p(
+                t("no_camara_data"),
+                style={
+                    "font_family": FONT_BODY,
+                    "font_size": "13px",
+                    "color": INK_SOFT,
+                    "text_align": "center",
+                    "padding": "24px 8px",
+                },
+            ),
+        ),
+        style={"width": "100%"},
     )
 
 
