@@ -139,6 +139,7 @@ _STRINGS = {
     "tab_browse": ("Browse", "تصفّح"),
     "tab_favorites": ("Favorites", "المفضلة"),
     "tab_camara": ("CAMARA", "CAMARA"),
+    "tab_passport": ("Passport", "الجواز"),
     "no_camara_data": (
         "Run a story from the Explore tab to see its CAMARA verification trail here.",
         "ابدأ حكاية من تبويب استكشف لترى هنا مسار التحقق عبر CAMARA.",
@@ -358,10 +359,11 @@ def tab_bar():
         tab_button("explore", "compass", "tab_explore"),
         tab_button("browse", "map", "tab_browse"),
         tab_button("favorites", "heart", "tab_favorites"),
+        tab_button("passport", "award", "tab_passport"),
         tab_button("camara", "shield-check", "tab_camara"),
         style={
             "display": "flex",
-            "gap": "6px",
+            "gap": "4px",
             "width": "100%",
             "background": SAND,
             "border": f"1px solid {LINE}",
@@ -1455,9 +1457,15 @@ def passport_strip():
     )
 
 
-def favorites_tab():
+def passport_tab():
     return rx.el.div(
         passport_strip(),
+        style={"width": "100%"},
+    )
+
+
+def favorites_tab():
+    return rx.el.div(
         rx.cond(
             RawiState.favorite_cards.length() == 0,
             rx.el.p(

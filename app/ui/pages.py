@@ -17,6 +17,7 @@ from app.ui.components import (
     browse_tab,
     camara_tab,
     favorites_tab,
+    passport_tab,
     hero,
     install_card,
     network_card,
@@ -340,6 +341,7 @@ def index():
             rx.cond(RawiState.active_tab == "explore", explore_tab()),
             rx.cond(RawiState.active_tab == "browse", browse_tab()),
             rx.cond(RawiState.active_tab == "favorites", favorites_tab()),
+            rx.cond(RawiState.active_tab == "passport", passport_tab()),
             rx.cond(RawiState.active_tab == "camara", camara_tab()),
             install_card(),
             rx.el.p(
