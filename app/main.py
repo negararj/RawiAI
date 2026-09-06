@@ -6,6 +6,7 @@ import reflex as rx
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from app.ui.insights_page import insights_index
 from app.ui.pages import index
 from app.webhooks.geofence_events import receive_geofence_event
 
@@ -52,4 +53,10 @@ app.add_page(
         {"name": "apple-mobile-web-app-capable", "content": "yes"},
         {"name": "apple-mobile-web-app-title", "content": "RawiAI"},
     ],
+)
+app.add_page(
+    insights_index,
+    route="/insights",
+    title="RawiAI Insights",
+    description="Operator-facing view of aggregated, anonymized visitor activity.",
 )

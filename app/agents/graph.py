@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 
+from app.analytics import record_visit
 from app.agents.location_agent import run_location_agent
 from app.agents.qa_agent import answer_question
 from app.agents.route_agent import suggest_route
@@ -26,6 +27,14 @@ def run_demo_flow(
     route_result = suggest_route(location_result["site"]["id"])
     audio_result = text_to_speech(qa_result["answer"])
     qos_result = request_qos("rawiai-story-session")
+
+    record_visit(
+        site_id=site_id,
+        site_name=location_result["near_monument"],
+        question=question,
+        language=language,
+        congestion_level=route_result["congestion"]["congestion_level"],
+    )
 
     camara_calls = [
         "Number Verification",
