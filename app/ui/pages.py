@@ -10,13 +10,17 @@ from app.ui.components import (
     arrival_watch_script,
     ask_card,
     brand_header,
+    browse_tab,
+    favorites_tab,
     hero,
     install_card,
     network_card,
     route_card,
+    selected_site_chip,
     site_card,
     story_card,
     t,
+    tab_bar,
     timeline_card,
     trust_rail,
 )
@@ -101,25 +105,36 @@ SHELL_STYLE = {
 }
 
 
+def explore_tab():
+    return rx.el.div(
+        hero(),
+        selected_site_chip(),
+        trust_rail(),
+        arrival_alert_button(),
+        ask_card(),
+        rx.cond(
+            RawiState.started,
+            rx.el.div(
+                site_card(),
+                story_card(),
+                route_card(),
+                network_card(),
+                timeline_card(),
+                style={"display": "flex", "flex_direction": "column", "gap": "16px"},
+            ),
+        ),
+        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
+    )
+
+
 def index():
     return rx.el.div(
         rx.el.div(
             brand_header(),
-            hero(),
-            trust_rail(),
-            arrival_alert_button(),
-            ask_card(),
-            rx.cond(
-                RawiState.started,
-                rx.el.div(
-                    site_card(),
-                    story_card(),
-                    route_card(),
-                    network_card(),
-                    timeline_card(),
-                    style={"display": "flex", "flex_direction": "column", "gap": "16px"},
-                ),
-            ),
+            tab_bar(),
+            rx.cond(RawiState.active_tab == "explore", explore_tab()),
+            rx.cond(RawiState.active_tab == "browse", browse_tab()),
+            rx.cond(RawiState.active_tab == "favorites", favorites_tab()),
             install_card(),
             rx.el.p(
                 t("footer"),
@@ -133,6 +148,7 @@ def index():
             ),
             style=SHELL_STYLE,
             custom_attrs={"dir": RawiState.dir},
+            on_mount=RawiState.load_favorites,
         ),
         rx.script(
             """

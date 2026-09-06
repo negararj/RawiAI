@@ -126,6 +126,19 @@ _STRINGS = {
     "install_button": ("Install", "تثبيت"),
     "notify_me": ("Alert me on arrival", "نبّهني عند الوصول"),
     "watching": ("Watching for arrival...", "يراقب وصولك..."),
+    "tab_explore": ("Explore", "استكشف"),
+    "tab_browse": ("Browse", "تصفّح"),
+    "tab_favorites": ("Favorites", "المفضلة"),
+    "exploring": ("Exploring", "تستكشف"),
+    "select_country": ("Country", "الدولة"),
+    "select_city": ("City", "المدينة"),
+    "choose_city_hint": ("Choose a city to see its landmarks.", "اختر مدينة لعرض معالمها."),
+    "view_landmark": ("View", "عرض"),
+    "no_favorites_yet": (
+        "No favorites yet. Browse landmarks and tap the heart to save one.",
+        "لا توجد مفضلات بعد. تصفّح المعالم واضغط على القلب لحفظ أحدها.",
+    ),
+    "recommended_for_you": ("You might also like", "قد يعجبك أيضًا"),
     "footer": (
         "DevNull · Immersive Tourism & Smart Cities · Nokia CAMARA Hackathon",
         "DevNull · السياحة الغامرة والمدن الذكية · هاكاثون نوكيا CAMARA",
@@ -286,6 +299,74 @@ def hero():
 
 
 # ---------------------------------------------------------------------------
+# Tab navigation — Explore / Browse / Favorites
+# ---------------------------------------------------------------------------
+
+
+def tab_bar():
+    def tab_button(key: str, icon: str, label_key: str):
+        is_active = RawiState.active_tab == key
+        return rx.el.button(
+            rx.icon(tag=icon, size=16, color=rx.cond(is_active, "white", INK_SOFT)),
+            rx.el.span(
+                t(label_key),
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600"},
+            ),
+            on_click=RawiState.set_active_tab(key),
+            style={
+                "display": "flex",
+                "flex_direction": "column",
+                "align_items": "center",
+                "gap": "4px",
+                "flex": "1",
+                "padding": "10px 6px",
+                "border_radius": "14px",
+                "border": "none",
+                "cursor": "pointer",
+                "background": rx.cond(is_active, TEAL, "transparent"),
+                "color": rx.cond(is_active, "white", INK_SOFT),
+                "transition": "all 0.15s ease",
+            },
+        )
+
+    return rx.el.div(
+        tab_button("explore", "compass", "tab_explore"),
+        tab_button("browse", "map", "tab_browse"),
+        tab_button("favorites", "heart", "tab_favorites"),
+        style={
+            "display": "flex",
+            "gap": "6px",
+            "width": "100%",
+            "background": SAND,
+            "border": f"1px solid {LINE}",
+            "border_radius": "16px",
+            "padding": "4px",
+        },
+    )
+
+
+def selected_site_chip():
+    return rx.el.div(
+        rx.icon(tag="map-pin", size=13, color=TEAL),
+        rx.el.span(
+            f"{t('exploring')}: {RawiState.selected_site_name}",
+            style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": TEAL_DEEP},
+        ),
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "gap": "6px",
+            "padding": "6px 12px",
+            "border_radius": "999px",
+            "background": TEAL_SOFT,
+            "border": f"1px solid {LINE}",
+            "width": "fit-content",
+            "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Trust rail — the four CAMARA signals checked before the story begins
 # ---------------------------------------------------------------------------
 
@@ -331,7 +412,11 @@ def trust_rail():
 # proves presence to the backend, this gives the visitor an immediate nudge.
 # ---------------------------------------------------------------------------
 
-_ARRIVAL_WATCH_SCRIPT_TEMPLATE = """
+# Reads the target site's lat/lon/radius/name from the hidden elements
+# below at the moment the watch starts, rather than baking one site's
+# coordinates in at compile time - so switching landmarks in Browse
+# automatically re-targets the arrival alert too.
+_ARRIVAL_WATCH_SCRIPT = """
 (function() {
   function haversineMeters(lat1, lon1, lat2, lon2) {
     var R = 6371000;
@@ -344,9 +429,22 @@ _ARRIVAL_WATCH_SCRIPT_TEMPLATE = """
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  function notifyArrival() {
-    var title = "__NOTIFY_TITLE__";
-    var body = "__NOTIFY_BODY__";
+  function readTarget() {
+    var byId = function(id, fallback) {
+      var el = document.getElementById(id);
+      return el ? el.innerText : fallback;
+    };
+    return {
+      lat: parseFloat(byId("rawi-site-lat", "0")),
+      lon: parseFloat(byId("rawi-site-lon", "0")),
+      radius: parseFloat(byId("rawi-site-radius", "150")),
+      name: byId("rawi-site-name", "this site"),
+    };
+  }
+
+  function notifyArrival(name) {
+    var title = "Rawi AI";
+    var body = "You've arrived at " + name + " — tap to hear its story.";
     if (window.Notification && Notification.permission === "granted") {
       var n = new Notification(title, { body: body, icon: "/rawiai-icon.svg" });
       n.onclick = function() {
@@ -372,18 +470,19 @@ _ARRIVAL_WATCH_SCRIPT_TEMPLATE = """
     }
 
     var begin = function() {
+      var target = readTarget();
       window.__rawiArrivalFired = false;
       window.__rawiWatchId = navigator.geolocation.watchPosition(
         function(pos) {
           var distance = haversineMeters(
             pos.coords.latitude,
             pos.coords.longitude,
-            __SITE_LAT__,
-            __SITE_LON__
+            target.lat,
+            target.lon
           );
-          if (distance <= __SITE_RADIUS__ && !window.__rawiArrivalFired) {
+          if (distance <= target.radius && !window.__rawiArrivalFired) {
             window.__rawiArrivalFired = true;
-            notifyArrival();
+            notifyArrival(target.name);
           }
         },
         function(err) {
@@ -404,43 +503,41 @@ _ARRIVAL_WATCH_SCRIPT_TEMPLATE = """
 
 
 def arrival_watch_script():
-    script = (
-        _ARRIVAL_WATCH_SCRIPT_TEMPLATE.replace("__SITE_LAT__", str(AL_HISN_FORT["lat"]))
-        .replace("__SITE_LON__", str(AL_HISN_FORT["lon"]))
-        .replace("__SITE_RADIUS__", str(AL_HISN_FORT["radius_meters"]))
-        .replace("__NOTIFY_TITLE__", "Rawi AI")
-        .replace(
-            "__NOTIFY_BODY__",
-            f"You've arrived at {AL_HISN_FORT['name']} — tap to hear its story.",
-        )
-    )
-    return rx.script(script)
+    return rx.script(_ARRIVAL_WATCH_SCRIPT)
 
 
 def arrival_alert_button():
     active = RawiState.arrival_watch_enabled
-    return rx.el.button(
-        rx.icon(tag=rx.cond(active, "bell-ring", "bell"), size=14, color=rx.cond(active, "white", TEAL)),
-        rx.el.span(
-            rx.cond(active, t("watching"), t("notify_me")),
-            style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600"},
+    return rx.el.div(
+        rx.el.button(
+            rx.icon(tag=rx.cond(active, "bell-ring", "bell"), size=14, color=rx.cond(active, "white", TEAL)),
+            rx.el.span(
+                rx.cond(active, t("watching"), t("notify_me")),
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600"},
+            ),
+            on_click=RawiState.toggle_arrival_watch,
+            style={
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "center",
+                "gap": "6px",
+                "width": "100%",
+                "padding": "10px",
+                "border_radius": "12px",
+                "border": f"1px solid {rx.cond(active, TEAL, LINE)}",
+                "background": rx.cond(active, TEAL, SAND),
+                "color": rx.cond(active, "white", TEAL),
+                "cursor": "pointer",
+                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+            },
         ),
-        on_click=RawiState.toggle_arrival_watch,
-        style={
-            "display": "flex",
-            "align_items": "center",
-            "justify_content": "center",
-            "gap": "6px",
-            "width": "100%",
-            "padding": "10px",
-            "margin_top": "10px",
-            "border_radius": "12px",
-            "border": f"1px solid {rx.cond(active, TEAL, LINE)}",
-            "background": rx.cond(active, TEAL, SAND),
-            "color": rx.cond(active, "white", TEAL),
-            "cursor": "pointer",
-            "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
-        },
+        # Hidden bridge elements: the arrival-watch script reads these at
+        # click-time so it always targets whichever landmark is selected.
+        rx.el.span(RawiState.selected_site_lat, id="rawi-site-lat", style={"display": "none"}),
+        rx.el.span(RawiState.selected_site_lon, id="rawi-site-lon", style={"display": "none"}),
+        rx.el.span(RawiState.selected_site_radius, id="rawi-site-radius", style={"display": "none"}),
+        rx.el.span(RawiState.selected_site_name, id="rawi-site-name", style={"display": "none"}),
+        style={"width": "100%", "margin_top": "10px"},
     )
 
 
@@ -740,7 +837,7 @@ def route_map():
         .replace("__MAIN_LON__", str(AL_HISN_FORT["lon"]))
         .replace("__ALT_LAT__", str(AL_HISN_FORT_ALT_ENTRANCE["lat"]))
         .replace("__ALT_LON__", str(AL_HISN_FORT_ALT_ENTRANCE["lon"]))
-        .replace("__MAIN_LABEL__", json.dumps(AL_HISN_FORT["name"]))
+        .replace("__MAIN_LABEL__", json.dumps(AL_HISN_FORT["name_en"]))
         .replace("__ALT_LABEL__", json.dumps(AL_HISN_FORT_ALT_ENTRANCE["name"]))
         .replace("__ROUTE_COLOR__", RUST)
     )
@@ -792,7 +889,10 @@ def route_card():
                 "text_align": RawiState.text_align,
             },
         ),
-        route_map(),
+        # The live map's alternate-entrance point only exists for Al Hisn
+        # Fort today; showing it for the other sites would plot the wrong
+        # coordinates, so it's scoped to the site it actually models.
+        rx.cond(RawiState.selected_site_id == AL_HISN_FORT["id"], route_map()),
     )
 
 
@@ -867,6 +967,154 @@ def timeline_card():
             },
         ),
         rx.el.div(rx.foreach(RawiState.timeline, row), style={"width": "100%"}),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Browse tab — country -> city -> landmark
+# ---------------------------------------------------------------------------
+
+
+def pill_row(items, selected_code, on_select):
+    def pill(item):
+        is_active = selected_code == item["code"]
+        return rx.el.button(
+            item["label"],
+            on_click=on_select(item["code"]),
+            style={
+                "font_family": FONT_BODY,
+                "padding": "8px 16px",
+                "font_size": "13px",
+                "font_weight": "600",
+                "border_radius": "999px",
+                "border": f"1px solid {rx.cond(is_active, TEAL, LINE)}",
+                "cursor": "pointer",
+                "background": rx.cond(is_active, TEAL, "white"),
+                "color": rx.cond(is_active, "white", INK),
+            },
+        )
+
+    return rx.el.div(
+        rx.foreach(items, pill),
+        style={"display": "flex", "flex_wrap": "wrap", "gap": "8px"},
+    )
+
+
+def favorite_heart_button(site_id, is_favorite):
+    active = is_favorite == "true"
+    return rx.el.button(
+        rx.icon(tag="heart", size=16, color=rx.cond(active, RUST, INK_SOFT)),
+        on_click=RawiState.toggle_favorite(site_id),
+        style={
+            "border": "none",
+            "background": "transparent",
+            "cursor": "pointer",
+            "padding": "4px",
+            "flex_shrink": "0",
+        },
+    )
+
+
+def landmark_card(item):
+    return card(
+        rx.el.div(
+            rx.el.div(
+                rx.el.p(
+                    item["name"],
+                    style={"font_family": FONT_HEADING, "font_size": "15px", "font_weight": "700", "color": INK, "margin": "0"},
+                ),
+                rx.el.p(
+                    item["city"],
+                    style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "2px 0 0 0"},
+                ),
+                style={"text_align": RawiState.text_align},
+            ),
+            favorite_heart_button(item["id"], item["is_favorite"]),
+            style={
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "space-between",
+                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+            },
+        ),
+        rx.el.button(
+            t("view_landmark"),
+            on_click=RawiState.select_landmark(item["id"]),
+            style={
+                "font_family": FONT_BODY,
+                "width": "100%",
+                "margin_top": "10px",
+                "padding": "9px",
+                "border": "none",
+                "border_radius": "12px",
+                "background": SAND,
+                "color": RUST_DARK,
+                "font_size": "13px",
+                "font_weight": "700",
+                "cursor": "pointer",
+            },
+        ),
+    )
+
+
+def browse_tab():
+    return rx.el.div(
+        card(
+            section_label("map-pin", t("select_country"), TEAL),
+            pill_row(RawiState.available_countries, RawiState.selected_country_code, RawiState.set_selected_country),
+        ),
+        rx.cond(
+            RawiState.selected_country_code != "",
+            card(
+                section_label("map-pin", t("select_city"), TEAL),
+                pill_row(RawiState.available_cities, RawiState.selected_city_code, RawiState.set_selected_city),
+            ),
+        ),
+        rx.cond(
+            RawiState.selected_city_code == "",
+            rx.el.p(
+                t("choose_city_hint"),
+                style={"font_family": FONT_BODY, "font_size": "13px", "color": INK_SOFT, "text_align": "center", "padding": "8px"},
+            ),
+            rx.el.div(
+                rx.foreach(RawiState.browse_landmarks, landmark_card),
+                style={"display": "flex", "flex_direction": "column", "gap": "12px"},
+            ),
+        ),
+        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Favorites tab — saved landmarks + tag-based recommendations
+# ---------------------------------------------------------------------------
+
+
+def favorites_tab():
+    return rx.el.div(
+        rx.cond(
+            RawiState.favorite_cards.length() == 0,
+            rx.el.p(
+                t("no_favorites_yet"),
+                style={"font_family": FONT_BODY, "font_size": "13px", "color": INK_SOFT, "text_align": "center", "padding": "8px"},
+            ),
+            rx.el.div(
+                rx.foreach(RawiState.favorite_cards, landmark_card),
+                style={"display": "flex", "flex_direction": "column", "gap": "12px"},
+            ),
+        ),
+        rx.cond(
+            RawiState.recommended_cards.length() > 0,
+            rx.el.div(
+                section_label("sparkles", t("recommended_for_you"), GOLD),
+                rx.el.div(
+                    rx.foreach(RawiState.recommended_cards, landmark_card),
+                    style={"display": "flex", "flex_direction": "column", "gap": "12px"},
+                ),
+                style={"margin_top": "6px"},
+            ),
+        ),
+        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
     )
 
 
