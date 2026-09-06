@@ -5,11 +5,9 @@ import reflex as rx
 from app.ui.components import (
     FONT_BODY,
     FONT_HEADING,
-    GOLD,
     INK,
     INK_SOFT,
     SKY_MINT,
-    TEAL,
     TEAL_DEEP,
     TEAL_SOFT,
     arrival_alert_button,
@@ -41,7 +39,7 @@ from app.ui.state import RawiState
 _PATTERN_SVG = (
     "data:image/svg+xml;utf8,"
     "<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'>"
-    "<g fill='none' stroke='%23C08A2E' stroke-width='1.5' opacity='0.22'>"
+    "<g fill='none' stroke='%23C08A2E' stroke-width='1.5' opacity='0.11'>"
     "<circle cx='0' cy='0' r='42'/>"
     "<circle cx='84' cy='0' r='42'/>"
     "<circle cx='0' cy='84' r='42'/>"
@@ -50,52 +48,81 @@ _PATTERN_SVG = (
     "</g></svg>"
 )
 
-# A hanging fanous (lantern) for the page corners - same shapes as the
-# header's lantern_mark, shifted down to make room for a chain and a small
-# crescent moon finial above, matching the deck's title-slide artwork.
-_BACKGROUND_LANTERN_SVG = (
+# A simple side-profile camel silhouette - ellipses and lines only, so
+# there's no arc-radius geometry to get wrong. The "walking" comes entirely
+# from animating this static pose across the screen, not from leg motion.
+_CAMEL_SVG = (
     "data:image/svg+xml;utf8,"
-    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'>"
-    "<line x1='12' y1='0' x2='12' y2='6' stroke='%23C08A2E' stroke-width='1' stroke-dasharray='1,2'/>"
-    "<circle cx='12' cy='7' r='2' fill='%23C08A2E'/>"
-    "<path d='M9 11h6v3H9z' fill='%23C08A2E'/>"
-    "<path d='M7 14h10l-1.5 3h-7z' fill='%231F7A72'/>"
-    "<rect x='7.5' y='17' width='9' height='9' rx='1.5' fill='%231F7A72'/>"
-    "<path d='M8 17.5 L16 17.5' stroke='%23EADFC0' stroke-width='0.6'/>"
-    "<path d='M8 21 L16 21' stroke='%23EADFC0' stroke-width='0.6'/>"
-    "<path d='M8 24.5 L16 24.5' stroke='%23EADFC0' stroke-width='0.6'/>"
-    "<path d='M9 26h6l-1.5 2.5h-3z' fill='%23C08A2E'/>"
-    "<circle cx='12' cy='29.5' r='1' fill='%23C08A2E'/>"
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 80'>"
+    "<g fill='none' stroke='%23B8763F' stroke-width='4' stroke-linecap='round'>"
+    "<line x1='40' y1='58' x2='40' y2='70'/>"
+    "<line x1='52' y1='60' x2='52' y2='70'/>"
+    "<line x1='85' y1='60' x2='85' y2='70'/>"
+    "<line x1='97' y1='58' x2='97' y2='70'/>"
+    "</g>"
+    "<ellipse cx='65' cy='48' rx='32' ry='16' fill='%23B8763F'/>"
+    "<circle cx='52' cy='28' r='14' fill='%23B8763F'/>"
+    "<line x1='90' y1='42' x2='112' y2='15' stroke='%23B8763F' stroke-width='12' stroke-linecap='round'/>"
+    "<ellipse cx='118' cy='10' rx='9' ry='6' fill='%23B8763F'/>"
+    "<line x1='35' y1='45' x2='25' y2='58' stroke='%23B8763F' stroke-width='3' stroke-linecap='round'/>"
+    "</svg>"
+)
+
+# A palm tree - trunk plus radiating fronds, swayed as one rigid shape
+# (matches how a real palm sways as a whole, and avoids animating a single
+# sub-part of a background-image, which CSS can't do anyway).
+_PALM_SVG = (
+    "data:image/svg+xml;utf8,"
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 100'>"
+    "<line x1='30' y1='95' x2='34' y2='30' stroke='%232B1D14' stroke-width='6' stroke-linecap='round'/>"
+    "<g stroke='%233C8C5C' stroke-width='5' stroke-linecap='round'>"
+    "<line x1='34' y1='30' x2='10' y2='15'/>"
+    "<line x1='34' y1='30' x2='20' y2='8'/>"
+    "<line x1='34' y1='30' x2='34' y2='4'/>"
+    "<line x1='34' y1='30' x2='48' y2='9'/>"
+    "<line x1='34' y1='30' x2='56' y2='20'/>"
+    "</g>"
     "</svg>"
 )
 
 
-def background_lanterns():
-    """Large decorative lanterns hanging from the top corners, behind the
-    card - purely a page-background flourish, matching the deck's title
-    slide. Hidden behind the (opaque) card on narrow phones; visible in the
-    margins on wider screens."""
-    def lantern(side):
-        style = {
-            "position": "fixed",
-            "top": "0",
-            "width": "110px",
-            "height": "147px",
-            "background_image": f"url(\"{_BACKGROUND_LANTERN_SVG}\")",
-            "background_repeat": "no-repeat",
-            "background_size": "contain",
-            "opacity": "0.6",
-            "pointer_events": "none",
-            "z_index": "0",
-        }
-        style[side] = "4%"
-        style["animation"] = "rawiSway 5s ease-in-out infinite"
-        style["transform_origin"] = "top center"
-        return rx.el.div(style=style)
-
+def desert_scene():
+    """A camel ambling across the bottom of the viewport and a palm tree
+    swaying nearby - the page-background flourish, replacing the lanterns."""
     return rx.el.div(
-        lantern("left"),
-        lantern("right"),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "34px",
+                "left": "-15%",
+                "width": "90px",
+                "height": "51px",
+                "background_image": f"url(\"{_CAMEL_SVG}\")",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.5",
+                "pointer_events": "none",
+                "z_index": "0",
+                "animation": "rawiWalk 40s linear infinite",
+            }
+        ),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "30px",
+                "right": "6%",
+                "width": "70px",
+                "height": "117px",
+                "background_image": f"url(\"{_PALM_SVG}\")",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.45",
+                "pointer_events": "none",
+                "z_index": "0",
+                "animation": "rawiSway 6s ease-in-out infinite",
+                "transform_origin": "bottom center",
+            }
+        ),
     )
 
 
@@ -113,6 +140,10 @@ _GLOBAL_ANIMATIONS = """
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.04); }
 }
+@keyframes rawiWalk {
+  0% { left: -15%; }
+  100% { left: 115%; }
+}
 </style>
 """
 
@@ -128,11 +159,33 @@ def splash_screen():
             color=TEAL_DEEP,
             style={"position": "absolute", "top": "10%", "right": "12%", "opacity": "0.8"},
         ),
-        rx.icon(
-            tag="anchor",
-            size=24,
-            color=INK,
-            style={"position": "absolute", "bottom": "12%", "right": "16%", "opacity": "0.7"},
+        rx.el.div(
+            style={
+                "position": "absolute",
+                "bottom": "18%",
+                "right": "8%",
+                "width": "60px",
+                "height": "100px",
+                "background_image": f"url(\"{_PALM_SVG}\")",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.75",
+                "animation": "rawiSway 6s ease-in-out infinite",
+                "transform_origin": "bottom center",
+            }
+        ),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "12%",
+                "width": "100px",
+                "height": "57px",
+                "background_image": f"url(\"{_CAMEL_SVG}\")",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.75",
+                "animation": "rawiWalk 14s linear infinite",
+            }
         ),
         rx.el.svg(
             rx.el.path(
@@ -318,7 +371,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
-        background_lanterns(),
+        desert_scene(),
         skyline_bar(),
         rx.html(_GLOBAL_ANIMATIONS),
         splash_screen(),
