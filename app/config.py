@@ -27,3 +27,13 @@ GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-0
 
 RAWIAI_USE_QDRANT = os.getenv("RAWIAI_USE_QDRANT", "false").lower() == "true"
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+
+# Real SMS-triggered entry: when a CAMARA geofencing "area-entered" event
+# arrives at /geofence, send the visitor a link via Twilio. Off by default -
+# needs a real Twilio account (or another provider swapped into
+# app/sms/client.py) to actually send anything.
+RAWIAI_USE_SMS = os.getenv("RAWIAI_USE_SMS", "false").lower() == "true"
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
+RAWIAI_APP_URL = os.getenv("RAWIAI_APP_URL", "")

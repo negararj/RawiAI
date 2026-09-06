@@ -12,11 +12,17 @@ from app.camara.client import get_nokia_client
 from app.camara.utils import api_error, to_dict
 
 
-def subscribe_geofence(site_name: str, lat: float, lon: float, radius_meters: int) -> dict:
+def subscribe_geofence(site_name: str, lat: float, lon: float, radius_meters: int, site_id: str = "") -> dict:
     """Subscribe to enter/exit events for a heritage site.
 
     CAMARA capability: Geofencing.
+
+    The correlator is site-specific (rawiai-geofence-<site_id>) so the
+    webhook receiving the resulting CloudEvent can tell which landmark it's
+    for, since the event payload itself doesn't otherwise carry that.
     """
+    correlator = f"rawiai-geofence-{site_id}" if site_id else "rawiai-geofence-subscription"
+
     if (
         not RAWIAI_USE_LIVE_APIS
         or not NOKIA_API_KEY
@@ -59,7 +65,7 @@ def subscribe_geofence(site_name: str, lat: float, lon: float, radius_meters: in
                 "subscription_max_events": 10,
                 "initial_event": True,
             },
-            correlator="rawiai-geofence-subscription",
+            correlator=correlator,
         )
     except Exception as exc:
         return {
@@ -86,9 +92,36 @@ def subscribe_geofence(site_name: str, lat: float, lon: float, radius_meters: in
 
 
 def handle_geofence_event(event: dict) -> dict:
-    """Normalize a CAMARA CloudEvent from the geofencing webhook."""
+    """Normalize a CAMARA geofencing CloudEvent from the webhook.
+
+    Defensive about the exact shape: real CAMARA geofencing CloudEvents
+    nest most fields under "data", but this also accepts the simulator's
+    flatter shape (a plain {"type", "event", "site_name", ...} dict) used
+    by the demo-mode "Simulate Entry" button, since no real Nokia event has
+    been captured yet to confirm the exact production payload.
+    """
+    data = event.get("data") if isinstance(event.get("data"), dict) else event
+
+    event_type = event.get("type", "unknown")
+    visitor_entered = event.get("event") == "ENTER" or "area-entered" in str(event_type)
+
+    device = data.get("device") if isinstance(data.get("device"), dict) else {}
+    phone_number = device.get("phoneNumber") or data.get("phone_number") or ""
+
+    correlator = data.get("correlator") or event.get("correlator") or ""
+    site_id = correlator.removeprefix("rawiai-geofence-") if correlator.startswith("rawiai-geofence-") else ""
+
+    site_name = event.get("site_name", "")
+    if not site_name and site_id:
+        from app.agents.sites import DEMO_SITES
+
+        site = DEMO_SITES.get(site_id)
+        site_name = site["name_en"] if site else "unknown"
+
     return {
-        "event_type": event.get("type", "unknown"),
-        "site_name": event.get("site_name", "unknown"),
-        "visitor_entered": event.get("event") == "ENTER",
+        "event_type": event_type,
+        "site_id": site_id,
+        "site_name": site_name or "unknown",
+        "phone_number": phone_number,
+        "visitor_entered": visitor_entered,
     }
