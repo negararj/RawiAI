@@ -92,6 +92,15 @@ class RawiState(rx.State):
     timeline: list[dict[str, str]] = []
 
     arrival_watch_enabled: bool = False
+    music_playing: bool = False
+
+    def toggle_music(self):
+        self.music_playing = not self.music_playing
+        script = (
+            "var el = document.getElementById('rawi-bgm'); "
+            "if (el) { " + ("el.play().catch(function(){});" if self.music_playing else "el.pause();") + " }"
+        )
+        return rx.call_script(script)
 
     def toggle_arrival_watch(self):
         self.arrival_watch_enabled = not self.arrival_watch_enabled

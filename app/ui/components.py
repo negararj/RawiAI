@@ -28,7 +28,7 @@ SKY_ROSE = "#E3A9A0"
 SKY_PEACH = "#F5DCC0"
 SKY_MINT = "#D8ECE6"
 
-FONT_HEADING = "'Reem Kufi', 'Tajawal', sans-serif"
+FONT_HEADING = "'Barabara', 'Reem Kufi', 'Tajawal', sans-serif"
 FONT_BODY = "'Tajawal', 'Cairo', sans-serif"
 FONT_STORY = "'Amiri', 'Tajawal', serif"
 
@@ -183,23 +183,9 @@ def t(key: str):
 
 
 def lantern_mark():
-    """A small hand-drawn Arabian fanous (lantern), matching the pitch deck's
-    teal-and-gold lantern motif, instead of a generic emoji."""
+    """The real illustrated fanous (lantern) asset, in the header."""
     return rx.el.div(
-        rx.el.svg(
-            rx.el.path(d="M9 3h6v3H9z", fill=GOLD),
-            rx.el.path(d="M7 6h10l-1.5 3h-7z", fill=TEAL),
-            rx.el.rect(x="7.5", y="9", width="9", height="9", rx="1.5", fill=TEAL),
-            rx.el.path(d="M8 9.5 L16 9.5", stroke=GOLD_SOFT, stroke_width="0.6"),
-            rx.el.path(d="M8 13 L16 13", stroke=GOLD_SOFT, stroke_width="0.6"),
-            rx.el.path(d="M8 16.5 L16 16.5", stroke=GOLD_SOFT, stroke_width="0.6"),
-            rx.el.path(d="M9 18h6l-1.5 2.5h-3z", fill=GOLD),
-            rx.el.circle(cx="12", cy="21.5", r="1", fill=GOLD),
-            view_box="0 0 24 24",
-            width="22",
-            height="22",
-            fill="none",
-        ),
+        rx.image(src="/illustrations/lantern.png", width="26px", height="26px", style={"object_fit": "contain"}),
         style={
             "width": "38px",
             "height": "38px",
@@ -248,6 +234,31 @@ def language_toggle():
     )
 
 
+def music_toggle_button():
+    """Toggles the ambient background track (see the <audio> element in
+    pages.py). Silently does nothing if no audio file has been provided
+    yet at /audio/oud-ambient.mp3."""
+    playing = RawiState.music_playing
+    return rx.el.button(
+        rx.image(src="/illustrations/oud.png", width="18px", height="18px", style={"object_fit": "contain"}),
+        on_click=RawiState.toggle_music,
+        title="Toggle background music",
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "justify_content": "center",
+            "width": "32px",
+            "height": "32px",
+            "border_radius": "999px",
+            "border": f"1px solid {rx.cond(playing, RUST, LINE)}",
+            "background": rx.cond(playing, SAND, "transparent"),
+            "cursor": "pointer",
+            "padding": "0",
+            "opacity": rx.cond(playing, "1", "0.6"),
+        },
+    )
+
+
 def brand_header():
     return rx.el.div(
         rx.el.div(
@@ -282,7 +293,11 @@ def brand_header():
                 "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
             },
         ),
-        language_toggle(),
+        rx.el.div(
+            music_toggle_button(),
+            language_toggle(),
+            style={"display": "flex", "align_items": "center", "gap": "8px"},
+        ),
         style={
             "display": "flex",
             "align_items": "center",
