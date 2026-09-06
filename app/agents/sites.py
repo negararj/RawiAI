@@ -15,12 +15,13 @@ AL_HISN_FORT = {
     "lon": 55.3820,
     "radius_meters": 150,
     "tags": ["fort", "museum", "old-city"],
-}
-
-AL_HISN_FORT_ALT_ENTRANCE = {
-    "name": "Al Hisn Fort - East Entrance (quieter path)",
-    "lat": 25.3578,
-    "lon": 55.3835,
+    # Illustrative "quieter path" waypoint used to demo the congestion
+    # reroute feature and the live map - not a claim about a specific
+    # real gate.
+    "alt_name_en": "Al Hisn Fort - Quieter East Path",
+    "alt_name_ar": "قلعة الحصن - المسار الشرقي الهادئ",
+    "alt_lat": 25.3578,
+    "alt_lon": 55.3835,
 }
 
 QASR_AL_HOSN = {
@@ -37,6 +38,10 @@ QASR_AL_HOSN = {
     "lon": 54.3705,
     "radius_meters": 150,
     "tags": ["fort", "palace", "old-city"],
+    "alt_name_en": "Qasr Al Hosn - Quieter Garden Path",
+    "alt_name_ar": "قصر الحصن - مسار الحديقة الهادئ",
+    "alt_lat": 24.4778,
+    "alt_lon": 54.3718,
 }
 
 AL_FAHIDI = {
@@ -53,6 +58,10 @@ AL_FAHIDI = {
     "lon": 55.2972,
     "radius_meters": 200,
     "tags": ["old-city", "heritage-district", "wind-towers"],
+    "alt_name_en": "Al Fahidi - Quieter Creekside Path",
+    "alt_name_ar": "الفهيدي - مسار الخور الهادئ",
+    "alt_lat": 25.2651,
+    "alt_lon": 55.2989,
 }
 
 

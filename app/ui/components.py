@@ -1,10 +1,7 @@
 """Reusable, styled Reflex UI components for RawiAI."""
 
-import json
-
 import reflex as rx
 
-from app.agents.sites import AL_HISN_FORT, AL_HISN_FORT_ALT_ENTRANCE
 from app.ui.state import RawiState
 
 # ---------------------------------------------------------------------------
@@ -774,25 +771,42 @@ def congestion_badge():
     )
 
 
-_ROUTE_MAP_SCRIPT_TEMPLATE = """
+# Reads the main/alt points from the hidden bridge elements below at mount
+# time, so the same script works for whichever landmark is selected. Uses
+# el._leaflet_id (set internally by Leaflet) rather than a global flag to
+# decide whether to init, since the container div remounts fresh - with a
+# new key() - each time the selected site changes.
+_ROUTE_MAP_SCRIPT = """
 (function() {
+  function readPoint(latId, lonId, nameId) {
+    var byId = function(id) {
+      var el = document.getElementById(id);
+      return el ? el.innerText : "";
+    };
+    return {
+      lat: parseFloat(byId(latId)),
+      lon: parseFloat(byId(lonId)),
+      name: byId(nameId),
+    };
+  }
+
   function initMap() {
-    if (window.__rawiMapInited) return;
     var el = document.getElementById("rawi-route-map");
-    if (!el || typeof L === "undefined") return;
-    window.__rawiMapInited = true;
+    if (!el || typeof L === "undefined" || el._leaflet_id) return;
 
-    var main = [__MAIN_LAT__, __MAIN_LON__];
-    var alt = [__ALT_LAT__, __ALT_LON__];
+    var main = readPoint("rawi-site-lat", "rawi-site-lon", "rawi-site-name");
+    var alt = readPoint("rawi-alt-lat", "rawi-alt-lon", "rawi-alt-name");
+    var mainPos = [main.lat, main.lon];
+    var altPos = [alt.lat, alt.lon];
 
-    var map = L.map(el, { zoomControl: false }).setView(main, 17);
+    var map = L.map(el, { zoomControl: false }).setView(mainPos, 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-    L.marker(main).addTo(map).bindPopup(__MAIN_LABEL__);
-    L.marker(alt).addTo(map).bindPopup(__ALT_LABEL__);
-    map.fitBounds(L.latLngBounds([main, alt]), { padding: [24, 24] });
+    L.marker(mainPos).addTo(map).bindPopup(main.name);
+    L.marker(altPos).addTo(map).bindPopup(alt.name);
+    map.fitBounds(L.latLngBounds([mainPos, altPos]), { padding: [24, 24] });
 
-    fetch("https://router.project-osrm.org/route/v1/foot/" + main[1] + "," + main[0] + ";" + alt[1] + "," + alt[0] + "?overview=full&geometries=geojson")
+    fetch("https://router.project-osrm.org/route/v1/foot/" + mainPos[1] + "," + mainPos[0] + ";" + altPos[1] + "," + altPos[0] + "?overview=full&geometries=geojson")
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.routes && data.routes[0]) {
@@ -830,17 +844,10 @@ _ROUTE_MAP_SCRIPT_TEMPLATE = """
 
 
 def route_map():
-    """A small live OpenStreetMap showing the main entrance, the quieter
-    alternate entrance, and a walking route between them (via OSRM)."""
-    script = (
-        _ROUTE_MAP_SCRIPT_TEMPLATE.replace("__MAIN_LAT__", str(AL_HISN_FORT["lat"]))
-        .replace("__MAIN_LON__", str(AL_HISN_FORT["lon"]))
-        .replace("__ALT_LAT__", str(AL_HISN_FORT_ALT_ENTRANCE["lat"]))
-        .replace("__ALT_LON__", str(AL_HISN_FORT_ALT_ENTRANCE["lon"]))
-        .replace("__MAIN_LABEL__", json.dumps(AL_HISN_FORT["name_en"]))
-        .replace("__ALT_LABEL__", json.dumps(AL_HISN_FORT_ALT_ENTRANCE["name"]))
-        .replace("__ROUTE_COLOR__", RUST)
-    )
+    """A small live OpenStreetMap showing the main entrance, a quieter
+    alternate path, and a walking route between them (via OSRM) - for
+    whichever landmark is currently selected."""
+    script = _ROUTE_MAP_SCRIPT.replace("__ROUTE_COLOR__", RUST)
 
     return rx.el.div(
         rx.el.div(
@@ -855,7 +862,13 @@ def route_map():
                 "border": f"1px solid {LINE}",
             },
         ),
+        rx.el.span(RawiState.selected_alt_lat, id="rawi-alt-lat", style={"display": "none"}),
+        rx.el.span(RawiState.selected_alt_lon, id="rawi-alt-lon", style={"display": "none"}),
+        rx.el.span(RawiState.selected_alt_name, id="rawi-alt-name", style={"display": "none"}),
         rx.script(script),
+        # Force a full remount when the selected landmark changes, so the
+        # map re-reads fresh coordinates instead of keeping the old view.
+        key=RawiState.selected_site_id,
         style={"width": "100%"},
     )
 
@@ -889,10 +902,7 @@ def route_card():
                 "text_align": RawiState.text_align,
             },
         ),
-        # The live map's alternate-entrance point only exists for Al Hisn
-        # Fort today; showing it for the other sites would plot the wrong
-        # coordinates, so it's scoped to the site it actually models.
-        rx.cond(RawiState.selected_site_id == AL_HISN_FORT["id"], route_map()),
+        route_map(),
     )
 
 

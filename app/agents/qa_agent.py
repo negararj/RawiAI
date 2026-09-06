@@ -1,5 +1,7 @@
 """Agent that answers visitor questions from heritage content."""
 
+from functools import lru_cache
+
 from app.agents.sites import DEFAULT_SITE_ID
 from app.config import GEMINI_API_KEY, GEMINI_MODEL, RAWIAI_USE_GEMINI
 from app.rag.retrieve import retrieve_facts
@@ -41,8 +43,17 @@ Heritage facts:
 """.strip()
 
 
+@lru_cache(maxsize=256)
 def _generate_with_gemini(prompt: str) -> str:
-    """Generate an answer using Gemini."""
+    """Generate an answer using Gemini.
+
+    Cached on the exact prompt: the demo mostly asks the same handful of
+    questions per site/language, and Gemini's free tier caps at a small
+    number of requests per day, so repeat demo runs would otherwise burn
+    quota re-generating an answer that was already produced. A failed
+    call raises and is never cached, so a transient rate limit still
+    retries on the next attempt.
+    """
     try:
         from google import genai
     except ImportError as exc:

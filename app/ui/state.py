@@ -89,6 +89,19 @@ class RawiState(rx.State):
     def selected_site_radius(self) -> str:
         return str(get_site(self.selected_site_id)["radius_meters"])
 
+    @rx.var
+    def selected_alt_lat(self) -> str:
+        return str(get_site(self.selected_site_id)["alt_lat"])
+
+    @rx.var
+    def selected_alt_lon(self) -> str:
+        return str(get_site(self.selected_site_id)["alt_lon"])
+
+    @rx.var
+    def selected_alt_name(self) -> str:
+        site = get_site(self.selected_site_id)
+        return site["alt_name_ar"] if self.is_ar else site["alt_name_en"]
+
     # -----------------------------------------------------------------
     # Browse tab: country -> city -> landmark
     # -----------------------------------------------------------------
