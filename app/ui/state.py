@@ -22,6 +22,8 @@ class RawiState(rx.State):
     selected_city_code: str = ""
 
     favorite_ids: list[str] = []
+    cached_stories: dict[str, str] = {}
+    is_offline_view: bool = False
 
     started: bool = False
     is_loading: bool = False
@@ -33,6 +35,7 @@ class RawiState(rx.State):
     step_qos: bool = False
 
     answer: str = ""
+    story_page_index: int = 0
     route: str = ""
     route_reason: str = ""
     congestion_level: str = ""
@@ -138,6 +141,7 @@ class RawiState(rx.State):
                     "name": site["name_ar"] if self.is_ar else site["name_en"],
                     "city": site["city_ar"] if self.is_ar else site["city_en"],
                     "is_favorite": "true" if site["id"] in self.favorite_ids else "false",
+                    "has_offline": "true" if self._cache_story_key(site["id"]) in self.cached_stories else "false",
                 }
             )
         return results
@@ -155,11 +159,13 @@ class RawiState(rx.State):
     def _reset_explore(self):
         self.started = False
         self.is_loading = False
+        self.is_offline_view = False
         self.step_identity = False
         self.step_presence = False
         self.step_network = False
         self.step_qos = False
         self.answer = ""
+        self.story_page_index = 0
         self.route = ""
         self.route_reason = ""
         self.congestion_level = ""
@@ -168,6 +174,37 @@ class RawiState(rx.State):
         self.geofence_status = ""
         self.story_source = ""
         self.status = "Tap Begin and let the network find you."
+
+    @rx.var
+    def story_pages(self) -> list[str]:
+        pages = [p.strip() for p in self.answer.split("\n\n") if p.strip()]
+        if pages:
+            return pages
+        return [self.answer] if self.answer else []
+
+    @rx.var
+    def story_page_count(self) -> int:
+        return len(self.story_pages)
+
+    @rx.var
+    def story_page_dots(self) -> list[int]:
+        return list(range(len(self.story_pages)))
+
+    @rx.var
+    def current_story_page(self) -> str:
+        pages = self.story_pages
+        if not pages:
+            return ""
+        index = min(self.story_page_index, len(pages) - 1)
+        return pages[index]
+
+    def next_story_page(self):
+        if self.story_page_index < len(self.story_pages) - 1:
+            self.story_page_index += 1
+
+    def prev_story_page(self):
+        if self.story_page_index > 0:
+            self.story_page_index -= 1
 
     def select_landmark(self, site_id: str):
         """Chosen from the Browse tab - switch the active landmark and jump to Explore."""
@@ -188,17 +225,36 @@ class RawiState(rx.State):
             f"localStorage.setItem('rawi_favorites', {json.dumps(json.dumps(self.favorite_ids))});"
         )
 
-    def hydrate_favorites(self, value: str):
+    def hydrate_local_data(self, value: str):
+        """Restore favorites and any offline-cached stories saved on this device."""
         try:
-            loaded = json.loads(value) if value else []
+            data = json.loads(value) if value else {}
         except (TypeError, ValueError):
-            loaded = []
-        self.favorite_ids = [site_id for site_id in loaded if site_id in DEMO_SITES]
+            data = {}
 
-    def load_favorites(self):
+        favorites = data.get("favorites") or []
+        self.favorite_ids = [site_id for site_id in favorites if site_id in DEMO_SITES]
+
+        stories = data.get("stories") or {}
+        self.cached_stories = {k: v for k, v in stories.items() if isinstance(v, str)}
+
+    def load_local_data(self):
         return rx.call_script(
-            "localStorage.getItem('rawi_favorites') || '[]'",
-            callback=RawiState.hydrate_favorites,
+            """
+JSON.stringify({
+  favorites: JSON.parse(localStorage.getItem('rawi_favorites') || '[]'),
+  stories: JSON.parse(localStorage.getItem('rawi_offline_stories') || '{}')
+})
+""",
+            callback=RawiState.hydrate_local_data,
+        )
+
+    def _cache_story_key(self, site_id: str | None = None, language: str | None = None) -> str:
+        return f"{site_id or self.selected_site_id}:{language or self.language}"
+
+    def _persist_story_cache(self):
+        return rx.call_script(
+            f"localStorage.setItem('rawi_offline_stories', {json.dumps(json.dumps(self.cached_stories))});"
         )
 
     @rx.var
@@ -209,6 +265,7 @@ class RawiState(rx.State):
                 "name": site["name_ar"] if self.is_ar else site["name_en"],
                 "city": site["city_ar"] if self.is_ar else site["city_en"],
                 "is_favorite": "true",
+                "has_offline": "true" if self._cache_story_key(site["id"]) in self.cached_stories else "false",
             }
             for site in DEMO_SITES.values()
             if site["id"] in self.favorite_ids
@@ -230,10 +287,30 @@ class RawiState(rx.State):
                 "name": site["name_ar"] if self.is_ar else site["name_en"],
                 "city": site["city_ar"] if self.is_ar else site["city_en"],
                 "is_favorite": "false",
+                "has_offline": "false",
             }
             for site in DEMO_SITES.values()
             if site["id"] not in self.favorite_ids and set(site["tags"]) & favorite_tags
         ]
+
+    def view_offline(self, site_id: str):
+        """Replay a previously cached story with no network round trip at all."""
+        key = self._cache_story_key(site_id)
+        cached_answer = self.cached_stories.get(key)
+        if cached_answer is None:
+            return
+
+        self.selected_site_id = site_id
+        self.active_tab = "explore"
+        self._reset_explore()
+
+        site = get_site(site_id)
+        self.is_offline_view = True
+        self.started = True
+        self.current_site = site["name_ar"] if self.is_ar else site["name_en"]
+        self.answer = cached_answer
+        self.story_source = "offline-cache"
+        self.status = "Showing a story saved earlier on this device."
 
     # -----------------------------------------------------------------
     # Explore tab: the CAMARA + Gemini demo flow
@@ -291,3 +368,12 @@ class RawiState(rx.State):
         self.step_qos = True
         self.status = "Your heritage story is live"
         self.is_loading = False
+
+        # Cache the finished story so it can be replayed offline later,
+        # from the Favorites tab, with no network round trip at all.
+        if self.answer:
+            self.cached_stories = {
+                **self.cached_stories,
+                self._cache_story_key(): self.answer,
+            }
+            yield self._persist_story_cache()

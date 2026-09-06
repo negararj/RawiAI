@@ -15,6 +15,7 @@ from app.ui.components import (
     hero,
     install_card,
     network_card,
+    offline_notice,
     route_card,
     selected_site_chip,
     site_card,
@@ -114,13 +115,21 @@ def explore_tab():
         ask_card(),
         rx.cond(
             RawiState.started,
-            rx.el.div(
-                site_card(),
-                story_card(),
-                route_card(),
-                network_card(),
-                timeline_card(),
-                style={"display": "flex", "flex_direction": "column", "gap": "16px"},
+            rx.cond(
+                RawiState.is_offline_view,
+                rx.el.div(
+                    offline_notice(),
+                    story_card(),
+                    style={"display": "flex", "flex_direction": "column", "gap": "16px"},
+                ),
+                rx.el.div(
+                    site_card(),
+                    story_card(),
+                    route_card(),
+                    network_card(),
+                    timeline_card(),
+                    style={"display": "flex", "flex_direction": "column", "gap": "16px"},
+                ),
             ),
         ),
         style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
@@ -148,7 +157,7 @@ def index():
             ),
             style=SHELL_STYLE,
             custom_attrs={"dir": RawiState.dir},
-            on_mount=RawiState.load_favorites,
+            on_mount=RawiState.load_local_data,
         ),
         rx.script(
             """

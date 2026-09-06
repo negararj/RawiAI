@@ -136,6 +136,12 @@ _STRINGS = {
         "لا توجد مفضلات بعد. تصفّح المعالم واضغط على القلب لحفظ أحدها.",
     ),
     "recommended_for_you": ("You might also like", "قد يعجبك أيضًا"),
+    "available_offline": ("Available offline", "متاح دون اتصال"),
+    "read_offline": ("Read Offline", "اقرأ دون اتصال"),
+    "offline_notice": (
+        "Showing a story saved earlier on this device - no network needed.",
+        "تعرض حكاية محفوظة مسبقًا على هذا الجهاز - لا حاجة إلى اتصال بالشبكة.",
+    ),
     "footer": (
         "DevNull · Immersive Tourism & Smart Cities · Nokia CAMARA Hackathon",
         "DevNull · السياحة الغامرة والمدن الذكية · هاكاثون نوكيا CAMARA",
@@ -641,6 +647,26 @@ def section_label(icon: str, text, color: str = RUST):
     )
 
 
+def offline_notice():
+    return rx.el.div(
+        rx.icon(tag="download", size=14, color=TEAL_DEEP),
+        rx.el.span(
+            t("offline_notice"),
+            style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600", "color": TEAL_DEEP},
+        ),
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "gap": "8px",
+            "padding": "10px 14px",
+            "border_radius": "12px",
+            "background": TEAL_SOFT,
+            "border": f"1px solid {LINE}",
+            "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+        },
+    )
+
+
 def site_card():
     return card(
         section_label("map-pin", t("current_site"), TEAL),
@@ -668,12 +694,154 @@ def site_card():
     )
 
 
+# ---------------------------------------------------------------------------
+# Landmark illustrations - flat-style banner art per site, in the same
+# geometric language as the lantern mark and skyline bar. Reuses the
+# already-verified dome path from the skyline (translate/scale only, no new
+# arc math) to stay low-risk.
+# ---------------------------------------------------------------------------
+
+_ILLUSTRATION_VIEWBOX = "0 0 320 150"
+_DOME_PATH = "M12 48 L12 30 A23 23 0 0 1 58 30 L58 48 Z"
+
+
+def _illustration_frame(*children):
+    return rx.el.svg(
+        rx.el.rect(x="0", y="0", width="320", height="150", fill=TEAL_SOFT),
+        rx.el.line(x1="0", y1="130", x2="320", y2="130", stroke=LINE, stroke_width="2"),
+        *children,
+        view_box=_ILLUSTRATION_VIEWBOX,
+        width="100%",
+        height="150",
+        style={"display": "block"},
+    )
+
+
+def al_hisn_fort_illustration():
+    merlon_x = [112, 132, 152, 172, 192]
+    merlons = [
+        rx.el.rect(x=str(x), y="40", width="12", height="10", fill=RUST)
+        for x in merlon_x
+    ]
+    return _illustration_frame(
+        rx.el.rect(x="40", y="90", width="60", height="40", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="220", y="90", width="60", height="40", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="110", y="50", width="100", height="80", fill=RUST),
+        *merlons,
+        rx.el.rect(x="150", y="100", width="20", height="30", fill=INK),
+        rx.el.line(x1="160", y1="40", x2="160", y2="15", stroke=INK, stroke_width="2"),
+        rx.el.polygon(points="160,15 178,22 160,29", fill=GOLD),
+        rx.el.line(x1="30", y1="130", x2="30", y2="95", stroke=INK, stroke_width="4"),
+        rx.el.line(x1="30", y1="95", x2="15", y2="80", stroke=INK, stroke_width="3"),
+        rx.el.line(x1="30", y1="95", x2="22", y2="78", stroke=INK, stroke_width="3"),
+        rx.el.line(x1="30", y1="95", x2="38", y2="78", stroke=INK, stroke_width="3"),
+        rx.el.line(x1="30", y1="95", x2="45", y2="80", stroke=INK, stroke_width="3"),
+    )
+
+
+def qasr_al_hosn_illustration():
+    def dome_group(translate_x, translate_y, scale):
+        return rx.el.g(
+            rx.el.path(d=_DOME_PATH, fill=RUST),
+            rx.el.rect(x="32", y="2", width="6", height="8", fill=RUST),
+            rx.el.circle(cx="35", cy="2", r="2", fill=RUST),
+            transform=f"translate({translate_x},{translate_y}) scale({scale})",
+        )
+
+    return _illustration_frame(
+        rx.el.rect(x="60", y="90", width="35", height="40", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="225", y="90", width="35", height="40", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="100", y="70", width="120", height="60", fill=RUST),
+        dome_group(42.5, 42, 1),
+        dome_group(207.5, 42, 1),
+        dome_group(90, -26, 2),
+    )
+
+
+def al_fahidi_illustration():
+    return _illustration_frame(
+        rx.el.rect(x="60", y="90", width="70", height="40", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="85", y="30", width="20", height="60", fill=RUST_DARK),
+        rx.el.line(x1="90", y1="35", x2="90", y2="85", stroke=GOLD_SOFT, stroke_width="2"),
+        rx.el.line(x1="97", y1="35", x2="97", y2="85", stroke=GOLD_SOFT, stroke_width="2"),
+        rx.el.line(x1="104", y1="35", x2="104", y2="85", stroke=GOLD_SOFT, stroke_width="2"),
+        rx.el.rect(x="180", y="95", width="65", height="35", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="200", y="35", width="18", height="60", fill=RUST_DARK),
+        rx.el.line(x1="204", y1="40", x2="204", y2="90", stroke=GOLD_SOFT, stroke_width="2"),
+        rx.el.line(x1="210", y1="40", x2="210", y2="90", stroke=GOLD_SOFT, stroke_width="2"),
+        rx.el.line(x1="216", y1="40", x2="216", y2="90", stroke=GOLD_SOFT, stroke_width="2"),
+    )
+
+
+def site_illustration():
+    return rx.match(
+        RawiState.selected_site_id,
+        ("qasr-al-hosn", qasr_al_hosn_illustration()),
+        ("al-fahidi", al_fahidi_illustration()),
+        al_hisn_fort_illustration(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Story pagination - "visual book" pages with a dot indicator
+# ---------------------------------------------------------------------------
+
+
+def story_page_dot(index):
+    is_active = index == RawiState.story_page_index
+    return rx.el.div(
+        style={
+            "width": rx.cond(is_active, "18px", "6px"),
+            "height": "6px",
+            "border_radius": "999px",
+            "background": rx.cond(is_active, RUST, LINE),
+            "transition": "all 0.2s ease",
+        }
+    )
+
+
+def story_pager():
+    return rx.el.div(
+        rx.el.button(
+            rx.icon(tag="chevron-left", size=16, color=rx.cond(RawiState.story_page_index == 0, LINE, RUST)),
+            on_click=RawiState.prev_story_page,
+            disabled=RawiState.story_page_index == 0,
+            style={"border": "none", "background": "transparent", "cursor": "pointer", "padding": "4px"},
+        ),
+        rx.el.div(
+            rx.foreach(RawiState.story_page_dots, story_page_dot),
+            style={"display": "flex", "align_items": "center", "gap": "5px"},
+        ),
+        rx.el.button(
+            rx.icon(
+                tag="chevron-right",
+                size=16,
+                color=rx.cond(RawiState.story_page_index >= RawiState.story_page_count - 1, LINE, RUST),
+            ),
+            on_click=RawiState.next_story_page,
+            disabled=RawiState.story_page_index >= RawiState.story_page_count - 1,
+            style={"border": "none", "background": "transparent", "cursor": "pointer", "padding": "4px"},
+        ),
+        style={
+            "display": "flex",
+            "align_items": "center",
+            "justify_content": "center",
+            "gap": "10px",
+            "margin_top": "12px",
+            "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+        },
+    )
+
+
 def story_card():
     return card(
+        rx.el.div(
+            site_illustration(),
+            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "14px", "border": f"1px solid {LINE}"},
+        ),
         section_label("volume-2", t("story"), RUST),
         rx.el.p(
-            RawiState.answer,
-            id="rawi-answer",
+            RawiState.current_story_page,
             style={
                 "font_family": FONT_STORY,
                 "font_size": "16px",
@@ -682,8 +850,11 @@ def story_card():
                 "margin": "0",
                 "text_align": RawiState.text_align,
                 "white_space": "pre-line",
+                "min_height": "90px",
             },
         ),
+        story_pager(),
+        rx.el.p(RawiState.answer, id="rawi-answer", style={"display": "none"}),
         rx.el.p(RawiState.language, id="rawi-language", style={"display": "none"}),
         rx.el.div(
             rx.el.button(
@@ -1026,6 +1197,7 @@ def favorite_heart_button(site_id, is_favorite):
 
 
 def landmark_card(item):
+    is_offline = item["has_offline"] == "true"
     return card(
         rx.el.div(
             rx.el.div(
@@ -1037,6 +1209,17 @@ def landmark_card(item):
                     item["city"],
                     style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "2px 0 0 0"},
                 ),
+                rx.cond(
+                    is_offline,
+                    rx.el.div(
+                        rx.icon(tag="download", size=11, color=TEAL),
+                        rx.el.span(
+                            t("available_offline"),
+                            style={"font_family": FONT_BODY, "font_size": "10px", "font_weight": "700", "color": TEAL},
+                        ),
+                        style={"display": "flex", "align_items": "center", "gap": "4px", "margin_top": "4px"},
+                    ),
+                ),
                 style={"text_align": RawiState.text_align},
             ),
             favorite_heart_button(item["id"], item["is_favorite"]),
@@ -1047,22 +1230,43 @@ def landmark_card(item):
                 "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
             },
         ),
-        rx.el.button(
-            t("view_landmark"),
-            on_click=RawiState.select_landmark(item["id"]),
-            style={
-                "font_family": FONT_BODY,
-                "width": "100%",
-                "margin_top": "10px",
-                "padding": "9px",
-                "border": "none",
-                "border_radius": "12px",
-                "background": SAND,
-                "color": RUST_DARK,
-                "font_size": "13px",
-                "font_weight": "700",
-                "cursor": "pointer",
-            },
+        rx.el.div(
+            rx.el.button(
+                t("view_landmark"),
+                on_click=RawiState.select_landmark(item["id"]),
+                style={
+                    "font_family": FONT_BODY,
+                    "flex": "1",
+                    "padding": "9px",
+                    "border": "none",
+                    "border_radius": "12px",
+                    "background": SAND,
+                    "color": RUST_DARK,
+                    "font_size": "13px",
+                    "font_weight": "700",
+                    "cursor": "pointer",
+                },
+            ),
+            rx.cond(
+                is_offline,
+                rx.el.button(
+                    t("read_offline"),
+                    on_click=RawiState.view_offline(item["id"]),
+                    style={
+                        "font_family": FONT_BODY,
+                        "flex": "1",
+                        "padding": "9px",
+                        "border": f"1px solid {TEAL}",
+                        "border_radius": "12px",
+                        "background": "transparent",
+                        "color": TEAL,
+                        "font_size": "13px",
+                        "font_weight": "700",
+                        "cursor": "pointer",
+                    },
+                ),
+            ),
+            style={"display": "flex", "gap": "8px", "margin_top": "10px"},
         ),
     )
 
