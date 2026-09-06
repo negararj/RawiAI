@@ -44,6 +44,10 @@ class RawiState(rx.State):
         self.question = question
 
     @rx.var
+    def is_ar(self) -> bool:
+        return self.language == "ar"
+
+    @rx.var
     def dir(self) -> str:
         return "rtl" if self.language == "ar" else "ltr"
 
