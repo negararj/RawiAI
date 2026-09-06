@@ -153,6 +153,11 @@ _STRINGS = {
         "لا توجد مفضلات بعد. تصفّح المعالم واضغط على القلب لحفظ أحدها.",
     ),
     "recommended_for_you": ("You might also like", "قد يعجبك أيضًا"),
+    "passport_title": ("Your Heritage Passport", "جواز سفرك التراثي"),
+    "passport_hint": (
+        "Complete a story at each landmark to collect its stamp.",
+        "أكمل حكاية كل معلم لتجمع ختمه.",
+    ),
     "available_offline": ("Available offline", "متاح دون اتصال"),
     "read_offline": ("Read Offline", "اقرأ دون اتصال"),
     "offline_notice": (
@@ -1397,8 +1402,62 @@ def browse_tab():
 # ---------------------------------------------------------------------------
 
 
+def passport_badge(item):
+    stamped = item["stamped"] == "true"
+    return rx.el.div(
+        rx.el.div(
+            rx.icon(tag=rx.cond(stamped, "check", "lock"), size=18, color=rx.cond(stamped, "white", INK_SOFT)),
+            style={
+                "width": "44px",
+                "height": "44px",
+                "border_radius": "999px",
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "center",
+                "background": rx.cond(stamped, TEAL, SAND),
+                "border": f"2px dashed {rx.cond(stamped, TEAL, LINE)}",
+            },
+        ),
+        rx.el.p(
+            item["name"],
+            style={
+                "font_family": FONT_BODY,
+                "font_size": "10px",
+                "font_weight": "600",
+                "color": rx.cond(stamped, INK, INK_SOFT),
+                "text_align": "center",
+                "margin": "4px 0 0 0",
+                "max_width": "70px",
+            },
+        ),
+        style={"display": "flex", "flex_direction": "column", "align_items": "center"},
+    )
+
+
+def passport_strip():
+    return card(
+        rx.el.div(
+            section_label("shield-check", t("passport_title"), GOLD),
+            rx.el.span(
+                RawiState.passport_count_label,
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": GOLD},
+            ),
+            style={"display": "flex", "align_items": "center", "justify_content": "space-between"},
+        ),
+        rx.el.p(
+            t("passport_hint"),
+            style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "0 0 12px 0"},
+        ),
+        rx.el.div(
+            rx.foreach(RawiState.passport_cards, passport_badge),
+            style={"display": "flex", "justify_content": "space-around", "width": "100%"},
+        ),
+    )
+
+
 def favorites_tab():
     return rx.el.div(
+        passport_strip(),
         rx.cond(
             RawiState.favorite_cards.length() == 0,
             rx.el.p(

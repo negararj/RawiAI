@@ -63,6 +63,7 @@ class RawiState(rx.State):
 
     favorite_ids: list[str] = []
     cached_stories: dict[str, str] = {}
+    stamped_ids: list[str] = []
     is_offline_view: bool = False
 
     started: bool = False
@@ -289,7 +290,7 @@ class RawiState(rx.State):
         )
 
     def hydrate_local_data(self, value: str):
-        """Restore favorites and any offline-cached stories saved on this device."""
+        """Restore favorites, offline-cached stories, and passport stamps saved on this device."""
         try:
             data = json.loads(value) if value else {}
         except (TypeError, ValueError):
@@ -301,16 +302,40 @@ class RawiState(rx.State):
         stories = data.get("stories") or {}
         self.cached_stories = {k: v for k, v in stories.items() if isinstance(v, str)}
 
+        stamps = data.get("stamps") or []
+        self.stamped_ids = [site_id for site_id in stamps if site_id in DEMO_SITES]
+
     def load_local_data(self):
         return rx.call_script(
             """
 JSON.stringify({
   favorites: JSON.parse(localStorage.getItem('rawi_favorites') || '[]'),
-  stories: JSON.parse(localStorage.getItem('rawi_offline_stories') || '{}')
+  stories: JSON.parse(localStorage.getItem('rawi_offline_stories') || '{}'),
+  stamps: JSON.parse(localStorage.getItem('rawi_stamps') || '[]')
 })
 """,
             callback=RawiState.hydrate_local_data,
         )
+
+    def _persist_stamps(self):
+        return rx.call_script(
+            f"localStorage.setItem('rawi_stamps', {json.dumps(json.dumps(self.stamped_ids))});"
+        )
+
+    @rx.var
+    def passport_cards(self) -> list[dict[str, str]]:
+        return [
+            {
+                "id": site["id"],
+                "name": site["name_ar"] if self.is_ar else site["name_en"],
+                "stamped": "true" if site["id"] in self.stamped_ids else "false",
+            }
+            for site in DEMO_SITES.values()
+        ]
+
+    @rx.var
+    def passport_count_label(self) -> str:
+        return f"{len(self.stamped_ids)}/{len(DEMO_SITES)}"
 
     def _cache_story_key(self, site_id: str | None = None, language: str | None = None) -> str:
         return f"{site_id or self.selected_site_id}:{language or self.language}"
@@ -440,3 +465,8 @@ JSON.stringify({
                 self._cache_story_key(): self.answer,
             }
             yield self._persist_story_cache()
+
+        # Stamp the passport for this landmark on a real, completed visit.
+        if self.answer and self.selected_site_id not in self.stamped_ids:
+            self.stamped_ids = [*self.stamped_ids, self.selected_site_id]
+            yield self._persist_stamps()
