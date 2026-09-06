@@ -1,13 +1,14 @@
 """Agent that decides which heritage site the visitor is near."""
 
-from app.agents.sites import AL_HISN_FORT
+from app.agents.sites import DEFAULT_SITE_ID, get_site
 from app.camara.geofencing import subscribe_geofence
 from app.camara.location import get_device_location, verify_location
 
 
-def run_location_agent() -> dict:
+def run_location_agent(site_id: str = DEFAULT_SITE_ID, language: str = "en") -> dict:
     """Use CAMARA location signals to choose the active landmark."""
-    site = AL_HISN_FORT
+    site = get_site(site_id)
+    site_name = site["name_ar"] if language == "ar" else site["name_en"]
 
     location = get_device_location()
     verification = verify_location(
@@ -16,7 +17,7 @@ def run_location_agent() -> dict:
         site["radius_meters"],
     )
     geofence = subscribe_geofence(
-        site["name"],
+        site_name,
         site["lat"],
         site["lon"],
         site["radius_meters"],
@@ -24,7 +25,7 @@ def run_location_agent() -> dict:
 
     return {
         "site": site,
-        "near_monument": site["name"],
+        "near_monument": site_name,
         "visitor_is_near_site": verification["verified"],
         "location": location,
         "verification": verification,

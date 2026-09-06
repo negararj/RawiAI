@@ -1,5 +1,6 @@
 """Agent that answers visitor questions from heritage content."""
 
+from app.agents.sites import DEFAULT_SITE_ID
 from app.config import GEMINI_API_KEY, GEMINI_MODEL, RAWIAI_USE_GEMINI
 from app.rag.retrieve import retrieve_facts
 
@@ -59,9 +60,9 @@ def _generate_with_gemini(prompt: str) -> str:
     return text.strip()
 
 
-def answer_question(question: str, language: str = "en") -> dict:
+def answer_question(question: str, language: str = "en", site_id: str = DEFAULT_SITE_ID) -> dict:
     """Retrieve facts and generate an answer."""
-    facts = retrieve_facts(question, language=language)
+    facts = retrieve_facts(question, language=language, site_id=site_id)
     prompt = _build_prompt(question, language, facts)
 
     if RAWIAI_USE_GEMINI and GEMINI_API_KEY:

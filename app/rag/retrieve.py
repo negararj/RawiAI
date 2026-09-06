@@ -3,6 +3,7 @@
 import re
 from pathlib import Path
 
+from app.agents.sites import DEFAULT_SITE_ID, get_site
 from app.config import RAWIAI_USE_QDRANT
 
 
@@ -14,15 +15,17 @@ def _clean_markdown(text: str) -> str:
     return text.strip()
 
 
-def _local_fallback(query: str, language: str) -> list[dict]:
+def _local_fallback(query: str, language: str, site_id: str) -> list[dict]:
     """Read heritage narration straight from markdown, no vector search needed."""
-    file_name = "al_hisn_fort_ar.md" if language == "ar" else "al_hisn_fort_en.md"
-    content_path = Path("app/content") / file_name
+    site = get_site(site_id)
+    slug = site["id"].replace("-", "_")
+    suffix = "ar" if language == "ar" else "en"
+    content_path = Path("app/content") / f"{slug}_{suffix}.md"
     text = _clean_markdown(content_path.read_text(encoding="utf-8"))
 
     return [
         {
-            "site": "Al Hisn Fort",
+            "site": site["name_ar"] if language == "ar" else site["name_en"],
             "language": language,
             "text": text,
             "query": query,
@@ -31,7 +34,7 @@ def _local_fallback(query: str, language: str) -> list[dict]:
     ]
 
 
-def _search_qdrant(query: str, language: str, limit: int = 3) -> list[dict]:
+def _search_qdrant(query: str, language: str, site_id: str, limit: int = 3) -> list[dict]:
     """Search Qdrant for the narration chunks closest to the visitor's question."""
     from qdrant_client.models import FieldCondition, Filter, MatchValue
 
@@ -44,14 +47,17 @@ def _search_qdrant(query: str, language: str, limit: int = 3) -> list[dict]:
         collection_name=COLLECTION_NAME,
         query=vector,
         query_filter=Filter(
-            must=[FieldCondition(key="language", match=MatchValue(value=language))]
+            must=[
+                FieldCondition(key="language", match=MatchValue(value=language)),
+                FieldCondition(key="site_id", match=MatchValue(value=site_id)),
+            ]
         ),
         limit=limit,
     )
 
     facts = [
         {
-            "site": point.payload.get("site", "Al Hisn Fort"),
+            "site": point.payload.get("site", site_id),
             "language": language,
             "text": point.payload.get("text", ""),
             "query": query,
@@ -63,7 +69,7 @@ def _search_qdrant(query: str, language: str, limit: int = 3) -> list[dict]:
     return facts
 
 
-def retrieve_facts(query: str, language: str = "en") -> list[dict]:
+def retrieve_facts(query: str, language: str = "en", site_id: str = DEFAULT_SITE_ID) -> list[dict]:
     """Return grounded heritage facts for the Q&A agent.
 
     Tries Qdrant vector search first when RAWIAI_USE_QDRANT is enabled. Falls
@@ -72,10 +78,10 @@ def retrieve_facts(query: str, language: str = "en") -> list[dict]:
     """
     if RAWIAI_USE_QDRANT:
         try:
-            facts = _search_qdrant(query, language=language)
+            facts = _search_qdrant(query, language=language, site_id=site_id)
             if facts:
                 return facts
         except Exception:
             pass
 
-    return _local_fallback(query, language)
+    return _local_fallback(query, language, site_id)
