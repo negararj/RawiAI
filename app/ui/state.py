@@ -166,6 +166,13 @@ class RawiState(rx.State):
         site = get_site(self.selected_site_id)
         return site["alt_name_ar"] if self.is_ar else site["alt_name_en"]
 
+    @rx.var
+    def all_sites_picker(self) -> list[dict[str, str]]:
+        return [
+            {"id": site["id"], "name": site["name_ar"] if self.is_ar else site["name_en"]}
+            for site in DEMO_SITES.values()
+        ]
+
     # -----------------------------------------------------------------
     # Browse tab: country -> city -> landmark
     # -----------------------------------------------------------------
@@ -347,6 +354,13 @@ JSON.stringify({
     @rx.var
     def passport_count_label(self) -> str:
         return f"{len(self.stamped_ids)}/{len(DEMO_SITES)}"
+
+    @rx.var
+    def passport_progress_pct(self) -> str:
+        total = len(DEMO_SITES)
+        if total == 0:
+            return "0%"
+        return f"{(len(self.stamped_ids) / total) * 100:.0f}%"
 
     def _cache_story_key(self, site_id: str | None = None, language: str | None = None) -> str:
         return f"{site_id or self.selected_site_id}:{language or self.language}"

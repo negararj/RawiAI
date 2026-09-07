@@ -114,7 +114,11 @@ _STRINGS = {
         "Voice input isn't supported in this browser.",
         "الإدخال الصوتي غير مدعوم في هذا المتصفح.",
     ),
-    "current_site": ("Current Site", "الموقع الحالي"),
+    "active_location": ("Active Location", "الموقع النشط"),
+    "before_start_hint": (
+        "Tap Begin the Story to verify your presence here through Nokia CAMARA.",
+        "اضغط على ابدأ الحكاية للتحقق من حضورك هنا عبر شبكة نوكيا CAMARA.",
+    ),
     "story": ("Story", "الحكاية"),
     "speak_story": ("Speak Story", "اروِ الحكاية"),
     "stop": ("Stop", "إيقاف"),
@@ -162,7 +166,6 @@ _STRINGS = {
         "Run a story from the Explore tab to see its CAMARA verification trail here.",
         "ابدأ حكاية من تبويب استكشف لترى هنا مسار التحقق عبر CAMARA.",
     ),
-    "exploring": ("Exploring", "تستكشف"),
     "select_country": ("Country", "الدولة"),
     "select_city": ("City", "المدينة"),
     "choose_city_hint": ("Choose a city to see its landmarks.", "اختر مدينة لعرض معالمها."),
@@ -350,14 +353,27 @@ def hero():
         ),
         eyebrow(t("tagline"), color=TEAL),
         rx.el.h1(
-            t("hero_title"),
+            _STRINGS["hero_title"][0],
             style={
                 "font_family": FONT_HEADING,
                 "font_size": "28px",
                 "font_weight": "700",
                 "color": INK,
                 "line_height": "1.3",
-                "margin": "8px 0 6px 0",
+                "margin": "8px 0 0 0",
+                "white_space": "pre-line",
+                "text_align": RawiState.text_align,
+            },
+        ),
+        rx.el.p(
+            _STRINGS["hero_title"][1],
+            style={
+                "font_family": FONT_HEADING,
+                "font_size": "17px",
+                "font_weight": "600",
+                "color": RUST,
+                "line_height": "1.3",
+                "margin": "2px 0 6px 0",
                 "white_space": "pre-line",
                 "text_align": RawiState.text_align,
             },
@@ -427,24 +443,106 @@ def tab_bar():
     )
 
 
-def selected_site_chip():
+def location_picker_row():
+    """A real, working landmark switcher styled as the mockup's search/
+    location bar - swaps the active site via the same handler Browse uses,
+    rather than a decorative search box that filters nothing."""
+
+    def option(site):
+        return rx.el.option(site["name"], value=site["id"])
+
     return rx.el.div(
-        rx.icon(tag="map-pin", size=13, color=TEAL),
-        rx.el.span(
-            f"{t('exploring')}: {RawiState.selected_site_name}",
-            style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": TEAL_DEEP},
+        rx.icon(tag="map-pin", size=16, color=TEAL, style={"flex_shrink": "0"}),
+        rx.el.select(
+            rx.foreach(RawiState.all_sites_picker, option),
+            value=RawiState.selected_site_id,
+            on_change=RawiState.select_landmark,
+            style={
+                "font_family": FONT_BODY,
+                "flex": "1",
+                "min_width": "0",
+                "padding": "12px 8px",
+                "border": "none",
+                "background": "transparent",
+                "font_size": "14px",
+                "font_weight": "600",
+                "color": INK,
+                "outline": "none",
+                "cursor": "pointer",
+            },
         ),
         style={
             "display": "flex",
             "align_items": "center",
-            "gap": "6px",
-            "padding": "6px 12px",
-            "border_radius": "999px",
-            "background": TEAL_SOFT,
+            "gap": "8px",
+            "width": "100%",
+            "padding": "2px 14px",
+            "border_radius": "14px",
             "border": f"1px solid {LINE}",
-            "width": "fit-content",
+            "background": SAND,
+            "box_sizing": "border-box",
             "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
         },
+    )
+
+
+def quick_begin_button():
+    disabled = RawiState.is_loading | RawiState.started
+    return rx.el.button(
+        rx.cond(RawiState.is_loading, t("listening"), t("begin_story")),
+        on_click=RawiState.start_demo,
+        disabled=disabled,
+        style={
+            "font_family": FONT_BODY,
+            "width": "100%",
+            "padding": "14px",
+            "border": "none",
+            "border_radius": "14px",
+            "background": f"linear-gradient(135deg, {RUST}, {RUST_DARK})",
+            "color": "white",
+            "font_size": "15px",
+            "font_weight": "700",
+            "cursor": rx.cond(disabled, "default", "pointer"),
+            "opacity": rx.cond(disabled, "0.6", "1"),
+            "box_shadow": "0 8px 18px rgba(174, 90, 46, 0.35)",
+            "animation": rx.cond(disabled, "none", "rawiPulse 2.5s ease-in-out infinite"),
+        },
+    )
+
+
+def location_preview_card():
+    """The mockup's persistent "Active Location" section - visible before
+    the story even starts, using only real static content (the site's
+    hand-drawn illustration and name) plus honest status copy: a neutral
+    hint pre-verification, the real CAMARA geofence result afterward."""
+    return card(
+        rx.el.div(
+            site_illustration(),
+            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "12px", "border": f"1px solid {LINE}"},
+        ),
+        section_label("map-pin", t("active_location"), TEAL),
+        rx.el.p(
+            RawiState.selected_site_name,
+            style={
+                "font_family": FONT_HEADING,
+                "font_size": "18px",
+                "font_weight": "700",
+                "color": INK,
+                "margin": "0",
+                "text_align": RawiState.text_align,
+            },
+        ),
+        rx.el.p(
+            rx.cond(RawiState.started, RawiState.geofence_status, t("before_start_hint")),
+            style={
+                "font_family": FONT_BODY,
+                "font_size": "12px",
+                "color": INK_SOFT,
+                "margin": "4px 0 0 0",
+                "line_height": "1.5",
+                "text_align": RawiState.text_align,
+            },
+        ),
     )
 
 
@@ -787,35 +885,6 @@ def offline_notice():
     )
 
 
-def site_card():
-    return card(
-        rx.el.div(
-            site_illustration(),
-            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "14px", "border": f"1px solid {LINE}"},
-        ),
-        section_label("map-pin", t("current_site"), TEAL),
-        rx.el.p(
-            RawiState.current_site,
-            style={
-                "font_family": FONT_HEADING,
-                "font_size": "18px",
-                "font_weight": "700",
-                "color": INK,
-                "margin": "0",
-                "text_align": RawiState.text_align,
-            },
-        ),
-        rx.el.p(
-            RawiState.geofence_status,
-            style={
-                "font_family": FONT_BODY,
-                "font_size": "12px",
-                "color": INK_SOFT,
-                "margin": "4px 0 0 0",
-                "text_align": RawiState.text_align,
-            },
-        ),
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -1591,11 +1660,31 @@ def passport_strip():
             rx.foreach(RawiState.passport_cards, passport_badge),
             style={"display": "flex", "justify_content": "space-around", "width": "100%"},
         ),
+        rx.el.div(
+            rx.el.div(
+                style={
+                    "height": "100%",
+                    "width": RawiState.passport_progress_pct,
+                    "background": f"linear-gradient(90deg, {GOLD}, {TEAL})",
+                    "border_radius": "999px",
+                    "transition": "width 0.3s ease",
+                },
+            ),
+            style={
+                "width": "100%",
+                "height": "6px",
+                "background": SAND,
+                "border_radius": "999px",
+                "overflow": "hidden",
+                "margin_top": "16px",
+            },
+        ),
     )
 
 
 def passport_tab():
     return rx.el.div(
+        screen_title("award", "passport_title", GOLD),
         passport_strip(),
         style={"width": "100%"},
     )

@@ -20,11 +20,12 @@ from app.ui.components import (
     passport_tab,
     hero,
     install_card,
+    location_picker_row,
+    location_preview_card,
     network_card,
     offline_notice,
+    quick_begin_button,
     route_card,
-    selected_site_chip,
-    site_card,
     story_card,
     t,
     tab_bar,
@@ -277,7 +278,12 @@ SHELL_STYLE = {
 def explore_tab():
     return rx.el.div(
         hero(),
-        selected_site_chip(),
+        rx.el.div(
+            location_picker_row(),
+            quick_begin_button(),
+            style={"display": "flex", "flex_direction": "column", "gap": "10px", "width": "100%"},
+        ),
+        location_preview_card(),
         trust_rail(),
         arrival_alert_button(),
         ask_card(),
@@ -291,7 +297,6 @@ def explore_tab():
                     style={"display": "flex", "flex_direction": "column", "gap": "16px"},
                 ),
                 rx.el.div(
-                    site_card(),
                     story_card(),
                     route_card(),
                     network_card(),
