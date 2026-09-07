@@ -11,6 +11,7 @@ def test_demo_flow_stub(monkeypatch):
     monkeypatch.setattr("app.camara.congestion.NOKIA_API_KEY", "")
     monkeypatch.setattr("app.camara.congestion.NOKIA_TEST_PHONE_NUMBER", "")
     monkeypatch.setattr("app.camara.number.NOKIA_API_KEY", "")
+    monkeypatch.setattr("app.camara.sim_swap.NOKIA_API_KEY", "")
     monkeypatch.setattr("app.camara.qos.NOKIA_API_KEY", "")
     monkeypatch.setattr("app.camara.qos.NOKIA_TEST_PHONE_NUMBER", "")
 
@@ -25,6 +26,8 @@ def test_demo_flow_stub(monkeypatch):
     assert "timeline" in result
     assert result["summary"].startswith("RawiAI found")
     assert "Geofencing" in result["camara_calls"]
+    assert "SIM Swap" in result["camara_calls"]
+    assert "sim_swap" in result
     assert result["location"]["near_monument"] == "Al Hisn Fort"
 
     steps = [item["step"] for item in result["timeline"]]

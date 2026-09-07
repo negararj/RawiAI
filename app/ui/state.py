@@ -84,6 +84,7 @@ class RawiState(rx.State):
     qos_status: str = ""
     current_site: str = ""
     geofence_status: str = ""
+    sim_swap_status: str = ""
     story_source: str = ""
     flow_summary: str = ""
     pwa_status: str = "Installable on supported mobile browsers"
@@ -232,6 +233,7 @@ class RawiState(rx.State):
         self.qos_status = ""
         self.current_site = ""
         self.geofence_status = ""
+        self.sim_swap_status = ""
         self.story_source = ""
         self.status = "Tap Begin and let the network find you."
 
@@ -435,6 +437,9 @@ JSON.stringify({
         ]
         self.flow_summary = result["summary"]
 
+        self.sim_swap_status = (
+            "No recent SIM swap detected" if result["sim_swap"].get("swapped") is False else "SIM swap status unknown"
+        )
         self.step_identity = True
         self.status = f"Identity confirmed via {result['identity']['source']}"
         yield

@@ -36,6 +36,7 @@ from app.audio.tts import text_to_speech
 from app.camara.congestion import get_congestion
 from app.camara.number import verify_number
 from app.camara.qos import request_qos
+from app.camara.sim_swap import check_sim_swap
 from app.config import GEMINI_API_KEY, GEMINI_MODEL, NOKIA_TEST_PHONE_NUMBER, RAWIAI_USE_GEMINI
 
 
@@ -44,6 +45,7 @@ class AgentState(TypedDict, total=False):
     language: str
     site_id: str
     identity_result: dict
+    sim_swap_result: dict
     location_result: dict
     congestion: dict
     should_reroute: bool
@@ -57,16 +59,30 @@ class AgentState(TypedDict, total=False):
 
 
 def _node_verify_identity(state: AgentState) -> dict:
-    identity_result = verify_number(NOKIA_TEST_PHONE_NUMBER or "+99999991000")
+    phone_number = NOKIA_TEST_PHONE_NUMBER or "+99999991000"
+    identity_result = verify_number(phone_number)
+    sim_swap_result = check_sim_swap(phone_number)
     return {
         "identity_result": identity_result,
-        "camara_calls": ["Number Verification"],
+        "sim_swap_result": sim_swap_result,
+        "camara_calls": ["Number Verification", "SIM Swap"],
         "timeline": [
             {
                 "step": "Identity",
                 "detail": "Verify the visitor phone/session context.",
                 "source": identity_result["source"],
-            }
+            },
+            {
+                "step": "SIM Swap",
+                "detail": (
+                    "No recent SIM swap detected."
+                    if sim_swap_result.get("swapped") is False
+                    else "Recent SIM swap detected - treat session with extra caution."
+                    if sim_swap_result.get("swapped")
+                    else "SIM swap status unknown."
+                ),
+                "source": sim_swap_result["source"],
+            },
         ],
     }
 
@@ -300,6 +316,7 @@ def run_demo_flow(
 
     return {
         "identity": identity_result,
+        "sim_swap": final_state["sim_swap_result"],
         "language": language,
         "question": question,
         "location": location_result,
