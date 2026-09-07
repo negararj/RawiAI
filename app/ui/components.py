@@ -309,6 +309,22 @@ def brand_header():
 
 def hero():
     return rx.el.div(
+        rx.el.div(
+            style={
+                "position": "absolute",
+                "top": "-6px",
+                "right": "0",
+                "width": "44px",
+                "height": "58px",
+                "background_image": "url('/illustrations/lantern.png')",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.9",
+                "pointer_events": "none",
+                "animation": "rawiSway 5s ease-in-out infinite",
+                "transform_origin": "top center",
+            }
+        ),
         eyebrow(t("tagline"), color=TEAL),
         rx.el.h1(
             t("hero_title"),
@@ -335,7 +351,7 @@ def hero():
             },
         ),
         star_divider(),
-        style={"display": "flex", "flex_direction": "column", "gap": "2px", "width": "100%"},
+        style={"display": "flex", "flex_direction": "column", "gap": "2px", "width": "100%", "position": "relative"},
     )
 
 

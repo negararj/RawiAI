@@ -50,61 +50,46 @@ _PATTERN_SVG = (
 )
 
 def desert_scene():
-    """A camel ambling across the bottom of the viewport and a palm tree
-    swaying nearby - the page-background flourish."""
+    """A camel ambling low along the bottom of the viewport - the only
+    "foreground" background element; everything else in skyline_bar()
+    blends in at low opacity instead."""
     return rx.el.div(
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "50px",
-                "left": "-15%",
-                "width": "150px",
-                "height": "86px",
-                "background_image": "url('/illustrations/camel.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.85",
-                "pointer_events": "none",
-                "z_index": "0",
-                "animation": "rawiWalk 40s linear infinite",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "44px",
-                "right": "4%",
-                "width": "110px",
-                "height": "183px",
-                "background_image": "url('/illustrations/palm.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.85",
-                "pointer_events": "none",
-                "z_index": "0",
-                "animation": "rawiSway 6s ease-in-out infinite",
-                "transform_origin": "bottom center",
-            }
-        ),
+        style={
+            "position": "fixed",
+            "bottom": "8px",
+            "left": "-15%",
+            "width": "150px",
+            "height": "86px",
+            "background_image": "url('/illustrations/camel.png')",
+            "background_repeat": "no-repeat",
+            "background_size": "contain",
+            "opacity": "0.85",
+            "pointer_events": "none",
+            "z_index": "0",
+            "animation": "rawiWalk 40s linear infinite",
+        }
     )
 
 
 def skyline_bar():
-    """A fixed heritage skyline along the bottom of the viewport, plus the
-    Burj Al Arab off to one side - the real illustrated assets."""
+    """A low-opacity skyline vignette along the bottom of the viewport,
+    blended into the background rather than competing with foreground
+    text: the skyline centered, the Burj Al Arab to its right, and the
+    palm tree to its left."""
     return rx.el.div(
         rx.el.div(
             style={
                 "position": "fixed",
                 "bottom": "0",
-                "left": "0",
-                "width": "100%",
-                "height": "90px",
+                "left": "50%",
+                "transform": "translateX(-50%)",
+                "width": "210px",
+                "height": "95px",
                 "background_image": "url('/illustrations/skyline.png')",
                 "background_repeat": "no-repeat",
                 "background_position": "center bottom",
                 "background_size": "contain",
-                "opacity": "0.9",
+                "opacity": "0.3",
                 "pointer_events": "none",
                 "z_index": "0",
             }
@@ -113,14 +98,30 @@ def skyline_bar():
             style={
                 "position": "fixed",
                 "bottom": "0",
-                "right": "2%",
-                "width": "54px",
-                "height": "140px",
+                "right": "6%",
+                "width": "46px",
+                "height": "120px",
                 "background_image": "url('/illustrations/burj-al-arab.png')",
                 "background_repeat": "no-repeat",
                 "background_position": "center bottom",
                 "background_size": "contain",
-                "opacity": "0.9",
+                "opacity": "0.3",
+                "pointer_events": "none",
+                "z_index": "0",
+            }
+        ),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "0",
+                "left": "4%",
+                "width": "80px",
+                "height": "134px",
+                "background_image": "url('/illustrations/palm.png')",
+                "background_repeat": "no-repeat",
+                "background_position": "center bottom",
+                "background_size": "contain",
+                "opacity": "0.3",
                 "pointer_events": "none",
                 "z_index": "0",
             }
