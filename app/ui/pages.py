@@ -49,6 +49,85 @@ _PATTERN_SVG = (
     "</g></svg>"
 )
 
+def desert_scene():
+    """A camel ambling across the bottom of the viewport and a palm tree
+    swaying nearby - the page-background flourish."""
+    return rx.el.div(
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "50px",
+                "left": "-15%",
+                "width": "150px",
+                "height": "86px",
+                "background_image": "url('/illustrations/camel.png')",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.85",
+                "pointer_events": "none",
+                "z_index": "0",
+                "animation": "rawiWalk 40s linear infinite",
+            }
+        ),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "44px",
+                "right": "4%",
+                "width": "110px",
+                "height": "183px",
+                "background_image": "url('/illustrations/palm.png')",
+                "background_repeat": "no-repeat",
+                "background_size": "contain",
+                "opacity": "0.85",
+                "pointer_events": "none",
+                "z_index": "0",
+                "animation": "rawiSway 6s ease-in-out infinite",
+                "transform_origin": "bottom center",
+            }
+        ),
+    )
+
+
+def skyline_bar():
+    """A fixed heritage skyline along the bottom of the viewport, plus the
+    Burj Al Arab off to one side - the real illustrated assets."""
+    return rx.el.div(
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "0",
+                "left": "0",
+                "width": "100%",
+                "height": "90px",
+                "background_image": "url('/illustrations/skyline.png')",
+                "background_repeat": "no-repeat",
+                "background_position": "center bottom",
+                "background_size": "contain",
+                "opacity": "0.9",
+                "pointer_events": "none",
+                "z_index": "0",
+            }
+        ),
+        rx.el.div(
+            style={
+                "position": "fixed",
+                "bottom": "0",
+                "right": "2%",
+                "width": "54px",
+                "height": "140px",
+                "background_image": "url('/illustrations/burj-al-arab.png')",
+                "background_repeat": "no-repeat",
+                "background_position": "center bottom",
+                "background_size": "contain",
+                "opacity": "0.9",
+                "pointer_events": "none",
+                "z_index": "0",
+            }
+        ),
+    )
+
+
 _GLOBAL_ANIMATIONS = """
 <style>
 /* English display headings, matching the pitch deck. Only in the font
@@ -263,6 +342,8 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
+        desert_scene(),
+        skyline_bar(),
         rx.html(_GLOBAL_ANIMATIONS),
         splash_screen(),
         # Ambient background track, toggled by music_toggle_button() in the
