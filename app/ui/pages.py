@@ -314,16 +314,6 @@ def index():
             rx.cond(RawiState.active_tab == "passport", passport_tab()),
             rx.cond(RawiState.active_tab == "camara", camara_tab()),
             install_card(),
-            rx.el.p(
-                t("footer"),
-                style={
-                    "font_family": FONT_BODY,
-                    "font_size": "11px",
-                    "color": INK_SOFT,
-                    "text_align": "center",
-                    "margin": "4px 0 0 0",
-                },
-            ),
             style=SHELL_STYLE,
             custom_attrs={"dir": RawiState.dir},
             on_mount=RawiState.load_local_data,

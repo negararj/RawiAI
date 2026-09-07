@@ -183,10 +183,6 @@ _STRINGS = {
         "Showing a story saved earlier on this device - no network needed.",
         "تعرض حكاية محفوظة مسبقًا على هذا الجهاز - لا حاجة إلى اتصال بالشبكة.",
     ),
-    "footer": (
-        "DevNull · Immersive Tourism & Smart Cities · Nokia CAMARA Hackathon",
-        "DevNull · السياحة الغامرة والمدن الذكية · هاكاثون نوكيا CAMARA",
-    ),
 }
 
 
