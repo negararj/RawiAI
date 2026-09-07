@@ -2,7 +2,10 @@
 
 import reflex as rx
 
+from app.agents.sites import DEMO_SITES
 from app.ui.state import RawiState
+
+_HAS_MULTIPLE_COUNTRIES = len({site["country_code"] for site in DEMO_SITES.values()}) > 1
 
 # ---------------------------------------------------------------------------
 # Design tokens
@@ -106,7 +109,7 @@ _STRINGS = {
     "presence": ("Presence", "الحضور"),
     "network": ("Network", "الشبكة"),
     "qod": ("QoD", "جودة الخدمة"),
-    "question_placeholder": ("Ask about this place...", "اسأل عن هذا المكان..."),
+    "question_placeholder": ("Ask Rawi about this place...", "اسأل راوي عن هذا المكان..."),
     "begin_story": ("Begin the Story", "ابدأ الحكاية"),
     "listening": ("Listening to the network...", "يستمع إلى الشبكة..."),
     "voice_listening": ("Listening...", "أستمع..."),
@@ -211,7 +214,15 @@ def network_status_pill():
         rx.el.span(style={"width": "6px", "height": "6px", "border_radius": "999px", "background": TEAL, "flex_shrink": "0"}),
         rx.el.span(
             t("network_ready"),
-            style={"font_family": FONT_BODY, "font_size": "10px", "font_weight": "700", "color": TEAL_DEEP, "white_space": "nowrap"},
+            style={
+                "font_family": FONT_BODY,
+                "font_size": "10px",
+                "font_weight": "700",
+                "color": TEAL_DEEP,
+                "white_space": "nowrap",
+                "text_transform": "uppercase",
+                "letter_spacing": "0.3px",
+            },
         ),
         style={
             "display": "flex",
@@ -1571,20 +1582,21 @@ def browse_breadcrumb():
 
 
 def browse_tab():
-    return rx.el.div(
-        browse_breadcrumb(),
-        screen_title("map", "explore_cities"),
-        card(
-            section_label("map-pin", t("select_country"), TEAL),
-            pill_row(RawiState.available_countries, RawiState.selected_country_code, RawiState.set_selected_country),
-        ),
-        rx.cond(
-            RawiState.selected_country_code != "",
+    children = [browse_breadcrumb(), screen_title("map", "explore_cities")]
+    if _HAS_MULTIPLE_COUNTRIES:
+        children.append(
             card(
-                section_label("map-pin", t("select_city"), TEAL),
-                pill_row(RawiState.available_cities, RawiState.selected_city_code, RawiState.set_selected_city),
-            ),
-        ),
+                section_label("map-pin", t("select_country"), TEAL),
+                pill_row(RawiState.available_countries, RawiState.selected_country_code, RawiState.set_selected_country),
+            )
+        )
+    children.append(
+        card(
+            section_label("map-pin", t("select_city"), TEAL),
+            pill_row(RawiState.available_cities, RawiState.selected_city_code, RawiState.set_selected_city),
+        )
+    )
+    children.append(
         rx.cond(
             RawiState.selected_city_code == "",
             rx.el.p(
@@ -1595,9 +1607,9 @@ def browse_tab():
                 rx.foreach(RawiState.browse_landmarks, landmark_card),
                 style={"display": "flex", "flex_direction": "column", "gap": "12px"},
             ),
-        ),
-        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
+        )
     )
+    return rx.el.div(*children, style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"})
 
 
 # ---------------------------------------------------------------------------

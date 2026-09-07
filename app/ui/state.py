@@ -69,12 +69,12 @@ class RawiState(rx.State):
     """State shared by the mobile UI."""
 
     language: str = "en"
-    question: str = "Tell me the story of this place."
+    question: str = ""
     status: str = "Tap Begin and let the network find you."
 
     active_tab: str = "explore"
     selected_site_id: str = DEFAULT_SITE_ID
-    selected_country_code: str = ""
+    selected_country_code: str = get_site(DEFAULT_SITE_ID)["country_code"]
     selected_city_code: str = ""
 
     favorite_ids: list[str] = []
@@ -473,7 +473,8 @@ JSON.stringify({
         yield
         await asyncio.sleep(0.35)
 
-        result = run_demo_flow(self.question, language=self.language, site_id=self.selected_site_id)
+        effective_question = self.question.strip() or "Tell me the story of this place."
+        result = run_demo_flow(effective_question, language=self.language, site_id=self.selected_site_id)
 
         self.camara_calls = result["camara_calls"]
         self.timeline = [
