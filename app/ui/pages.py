@@ -49,46 +49,6 @@ _PATTERN_SVG = (
     "</g></svg>"
 )
 
-def desert_scene():
-    """A camel ambling across the bottom of the viewport and a palm tree
-    swaying nearby - the page-background flourish, replacing the lanterns."""
-    return rx.el.div(
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "34px",
-                "left": "-15%",
-                "width": "90px",
-                "height": "51px",
-                "background_image": "url('/illustrations/camel.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.7",
-                "pointer_events": "none",
-                "z_index": "0",
-                "animation": "rawiWalk 40s linear infinite",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "30px",
-                "right": "6%",
-                "width": "70px",
-                "height": "117px",
-                "background_image": "url('/illustrations/palm.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.7",
-                "pointer_events": "none",
-                "z_index": "0",
-                "animation": "rawiSway 6s ease-in-out infinite",
-                "transform_origin": "bottom center",
-            }
-        ),
-    )
-
-
 _GLOBAL_ANIMATIONS = """
 <style>
 /* English display headings, matching the pitch deck. Only in the font
@@ -210,44 +170,6 @@ def splash_screen():
         },
     )
 
-def skyline_bar():
-    """A fixed heritage skyline along the bottom of the viewport, plus the
-    Burj Al Arab off to one side - the real illustrated assets."""
-    return rx.el.div(
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "0",
-                "left": "0",
-                "width": "100%",
-                "height": "56px",
-                "background_image": "url('/illustrations/skyline.png')",
-                "background_repeat": "no-repeat",
-                "background_position": "center bottom",
-                "background_size": "contain",
-                "opacity": "0.85",
-                "pointer_events": "none",
-                "z_index": "0",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "0",
-                "right": "2%",
-                "width": "34px",
-                "height": "90px",
-                "background_image": "url('/illustrations/burj-al-arab.png')",
-                "background_repeat": "no-repeat",
-                "background_position": "center bottom",
-                "background_size": "contain",
-                "opacity": "0.85",
-                "pointer_events": "none",
-                "z_index": "0",
-            }
-        ),
-    )
-
 PAGE_STYLE = {
     "min_height": "100vh",
     "width": "100%",
@@ -341,14 +263,13 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
-        desert_scene(),
-        skyline_bar(),
         rx.html(_GLOBAL_ANIMATIONS),
         splash_screen(),
         # Ambient background track, toggled by music_toggle_button() in the
         # header. Not autoplaying (browsers block that without a user
-        # gesture anyway) - starts/stops only when tapped. Silently does
-        # nothing if no file exists yet at this path.
-        rx.el.audio(src="/audio/oud-ambient.mp3", id="rawi-bgm", loop=True, style={"display": "none"}),
+        # gesture anyway) - starts/stops only when tapped. preload="none"
+        # because the current track is ~25MB; nothing downloads until the
+        # visitor actually taps the music button.
+        rx.el.audio(src="/audio/music.m4a", id="rawi-bgm", loop=True, preload="none", style={"display": "none"}),
         style=PAGE_STYLE,
     )
