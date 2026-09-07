@@ -437,9 +437,8 @@ JSON.stringify({
         ]
         self.flow_summary = result["summary"]
 
-        self.sim_swap_status = (
-            "No recent SIM swap detected" if result["sim_swap"].get("swapped") is False else "SIM swap status unknown"
-        )
+        _swapped = result["sim_swap"].get("swapped")
+        self.sim_swap_status = "no_swap" if _swapped is False else "swapped" if _swapped else "unknown"
         self.step_identity = True
         self.status = f"Identity confirmed via {result['identity']['source']}"
         yield

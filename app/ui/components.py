@@ -120,7 +120,9 @@ _STRINGS = {
     "stop": ("Stop", "إيقاف"),
     "source": ("Source", "المصدر"),
     "route": ("Route", "المسار"),
+    "heritage_trail_route": ("Heritage Trail Route", "مسار الرحلة التراثية"),
     "network_quality": ("Network Quality", "جودة الشبكة"),
+    "excellent_coverage": ("Network Coverage", "تغطية الشبكة"),
     "qod_line": ("Quality on Demand", "جودة الخدمة عند الطلب"),
     "qod_detail": (
         "Requested extra bandwidth priority so narration streams without buffering.",
@@ -131,6 +133,22 @@ _STRINGS = {
         "We're not only using browser GPS — every step below is confirmed by a Nokia CAMARA network API call.",
         "نحن لا نعتمد على GPS المتصفح فقط - كل خطوة أدناه مؤكدة عبر استدعاء فعلي لواجهات نوكيا CAMARA.",
     ),
+    "ai_systems_verified": ("AI Systems Verified", "أنظمة الذكاء الاصطناعي موثّقة"),
+    "active_verifications": ("Active Network Verifications", "التحققات الشبكية النشطة"),
+    "sim_swap_no_swap": ("No recent SIM swap detected", "لم يتم اكتشاف تبديل شريحة مؤخرًا"),
+    "sim_swap_swapped": ("Recent SIM swap detected", "تم اكتشاف تبديل شريحة مؤخرًا"),
+    "sim_swap_unknown": ("SIM swap status unknown", "حالة تبديل الشريحة غير معروفة"),
+    "what_is_camara_title": ("What is CAMARA?", "ما هو CAMARA؟"),
+    "what_is_camara_body": (
+        "CAMARA is an open standard, built with the GSMA and network operators, that lets apps like RawiAI ask "
+        "the mobile network itself to confirm things like presence, identity, and connection quality — "
+        "verified signals, not guesses.",
+        "CAMARA معيار مفتوح، طُوّر بالتعاون مع GSMA ومشغلي الشبكات، يتيح لتطبيقات مثل راوي أن تسأل الشبكة "
+        "نفسها للتحقق من أمور مثل الحضور والهوية وجودة الاتصال - إشارات موثّقة لا تخمينات.",
+    ),
+    "explore_cities": ("Explore Cities", "استكشف المدن"),
+    "your_saved_stories": ("Your Saved Stories", "حكاياتك المحفوظة"),
+    "stamps_collected": ("Stamps Collected", "الأختام المجمّعة"),
     "install_title": ("Install RawiAI", "ثبّت راوي"),
     "install_button": ("Install", "تثبيت"),
     "notify_me": ("Alert me on arrival", "نبّهني عند الوصول"),
@@ -175,6 +193,15 @@ _STRINGS = {
 def t(key: str):
     en, ar = _STRINGS[key]
     return rx.cond(RawiState.is_ar, ar, en)
+
+
+def t2(key: str):
+    """Both languages together, e.g. 'Explore Cities - المدن' - for section
+    titles where showing both reads as a feature, not clutter."""
+    en, ar = _STRINGS[key]
+    if en == ar:
+        return en
+    return f"{en} - {ar}"
 
 
 # ---------------------------------------------------------------------------
@@ -434,18 +461,18 @@ def trust_chip(icon: str, label, active):
     return rx.el.div(
         rx.icon(
             tag=icon,
-            size=15,
-            color=rx.cond(active, "white", INK_SOFT),
+            size=14,
+            color=rx.cond(active, TEAL, INK_SOFT),
         ),
         rx.el.span(label, style={"font_family": FONT_BODY, "font_size": "11px", "font_weight": "600"}),
         style={
             "display": "flex",
             "align_items": "center",
-            "gap": "6px",
-            "padding": "8px 10px",
-            "border_radius": "12px",
-            "background": rx.cond(active, TEAL, SAND),
-            "color": rx.cond(active, "white", INK_SOFT),
+            "gap": "5px",
+            "padding": "7px 10px",
+            "border_radius": "999px",
+            "background": rx.cond(active, TEAL_SOFT, CARD),
+            "color": rx.cond(active, TEAL, INK_SOFT),
             "border": f"1px solid {rx.cond(active, TEAL, LINE)}",
             "transition": "all 0.2s ease",
             "flex": "1",
@@ -766,6 +793,10 @@ def offline_notice():
 
 def site_card():
     return card(
+        rx.el.div(
+            site_illustration(),
+            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "14px", "border": f"1px solid {LINE}"},
+        ),
         section_label("map-pin", t("current_site"), TEAL),
         rx.el.p(
             RawiState.current_site,
@@ -886,8 +917,15 @@ def al_fahidi_illustration():
 
 
 def site_illustration():
+    return landmark_thumbnail(RawiState.selected_site_id)
+
+
+def landmark_thumbnail(site_id):
+    """Same illustration set as site_illustration(), but keyed off any
+    site_id Var (e.g. a landmark_card row) rather than the globally
+    selected site - used for Browse/Favorites photo-style cards."""
     return rx.match(
-        RawiState.selected_site_id,
+        site_id,
         ("qasr-al-hosn", qasr_al_hosn_illustration()),
         ("al-fahidi", al_fahidi_illustration()),
         al_hisn_fort_illustration(),
@@ -947,10 +985,6 @@ def story_pager():
 
 def story_card():
     return card(
-        rx.el.div(
-            site_illustration(),
-            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "14px", "border": f"1px solid {LINE}"},
-        ),
         section_label("volume-2", t("story"), RUST),
         rx.el.p(
             RawiState.current_story_page,
@@ -1158,7 +1192,7 @@ def route_map():
 def route_card():
     return card(
         rx.el.div(
-            section_label("route", t("route"), TEAL),
+            section_label("route", t("heritage_trail_route"), TEAL),
             congestion_badge(),
             style={"display": "flex", "align_items": "center", "justify_content": "space-between"},
         ),
@@ -1190,7 +1224,7 @@ def route_card():
 
 def network_card():
     return card(
-        section_label("gauge", t("network_quality"), RUST),
+        section_label("wifi", t("excellent_coverage"), RUST),
         rx.el.p(
             rx.cond(
                 RawiState.is_ar,
@@ -1222,11 +1256,9 @@ def network_card():
 
 def timeline_card():
     def row(item):
+        is_error = item["source"].contains("error")
+        border_color = rx.cond(is_error, RUST, TEAL)
         return rx.el.div(
-            rx.el.div(style={
-                "width": "6px", "height": "6px", "border_radius": "999px",
-                "background": TEAL, "margin_top": "6px", "flex_shrink": "0",
-            }),
             rx.el.div(
                 rx.el.p(item["step"], style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "700", "color": INK, "margin": "0"}),
                 rx.el.p(item["detail"], style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "2px 0 0 0"}),
@@ -1237,33 +1269,81 @@ def timeline_card():
                 style={"text_align": RawiState.text_align},
             ),
             style={
-                "display": "flex",
-                "gap": "10px",
-                "padding": "8px 0",
-                "border_bottom": f"1px solid {LINE}",
-                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+                "padding": "8px 12px",
+                "margin_bottom": "8px",
+                "background": SAND,
+                "border_radius": "8px",
+                "border_inline_start": f"3px solid {border_color}",
             },
         )
 
     return card(
-        section_label("shield-check", t("camara_proof"), TEAL),
+        section_label("shield-check", t("active_verifications"), TEAL),
         rx.el.p(
             t("camara_proof_body"),
             style={
                 "font_family": FONT_BODY,
                 "font_size": "12px",
                 "color": INK_SOFT,
-                "margin": "0 0 6px 0",
+                "margin": "0 0 10px 0",
                 "line_height": "1.5",
                 "text_align": RawiState.text_align,
             },
         ),
+        sim_swap_banner(),
         rx.el.div(rx.foreach(RawiState.timeline, row), style={"width": "100%"}),
+    )
+
+
+def sim_swap_banner():
+    status = RawiState.sim_swap_status
+    label = rx.match(
+        status,
+        ("swapped", t("sim_swap_swapped")),
+        ("no_swap", t("sim_swap_no_swap")),
+        t("sim_swap_unknown"),
+    )
+    accent = rx.cond(status == "swapped", RUST, TEAL)
+    return rx.cond(
+        status != "",
+        rx.el.div(
+            rx.icon(tag="shield-alert", size=16, color=accent),
+            rx.el.span(label, style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": INK}),
+            style={
+                "display": "flex",
+                "align_items": "center",
+                "gap": "8px",
+                "padding": "8px 12px",
+                "margin_bottom": "10px",
+                "border_radius": "8px",
+                "background": TEAL_SOFT,
+                "border_inline_start": f"3px solid {accent}",
+                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+            },
+        ),
+    )
+
+
+def what_is_camara_card():
+    return card(
+        section_label("info", t("what_is_camara_title"), INK_SOFT),
+        rx.el.p(
+            t("what_is_camara_body"),
+            style={
+                "font_family": FONT_BODY,
+                "font_size": "12px",
+                "color": INK_SOFT,
+                "margin": "0",
+                "line_height": "1.6",
+                "text_align": RawiState.text_align,
+            },
+        ),
     )
 
 
 def camara_tab():
     return rx.el.div(
+        screen_title("shield-check", "ai_systems_verified", TEAL),
         rx.cond(
             RawiState.timeline.length() > 0,
             timeline_card(),
@@ -1278,6 +1358,7 @@ def camara_tab():
                 },
             ),
         ),
+        what_is_camara_card(),
         style={"width": "100%"},
     )
 
@@ -1330,6 +1411,10 @@ def favorite_heart_button(site_id, is_favorite):
 def landmark_card(item):
     is_offline = item["has_offline"] == "true"
     return card(
+        rx.el.div(
+            landmark_thumbnail(item["id"]),
+            style={"border_radius": "12px", "overflow": "hidden", "margin_bottom": "12px", "border": f"1px solid {LINE}"},
+        ),
         rx.el.div(
             rx.el.div(
                 rx.el.p(
@@ -1402,8 +1487,19 @@ def landmark_card(item):
     )
 
 
+def screen_title(icon: str, key: str, color: str = TEAL):
+    """A bilingual screen heading, e.g. 'Explore Cities - المدن' - shown
+    above a tab's content regardless of the active language toggle."""
+    return rx.el.div(
+        rx.icon(tag=icon, size=18, color=color),
+        rx.el.h2(t2(key), style={"font_family": FONT_HEADING, "font_size": "18px", "font_weight": "700", "color": INK, "margin": "0"}),
+        style={"display": "flex", "align_items": "center", "gap": "8px", "margin_bottom": "4px"},
+    )
+
+
 def browse_tab():
     return rx.el.div(
+        screen_title("map", "explore_cities"),
         card(
             section_label("map-pin", t("select_country"), TEAL),
             pill_row(RawiState.available_countries, RawiState.selected_country_code, RawiState.set_selected_country),
@@ -1439,16 +1535,27 @@ def passport_badge(item):
     stamped = item["stamped"] == "true"
     return rx.el.div(
         rx.el.div(
-            rx.icon(tag=rx.cond(stamped, "check", "lock"), size=18, color=rx.cond(stamped, "white", INK_SOFT)),
+            rx.el.div(
+                rx.icon(tag=rx.cond(stamped, "award", "lock"), size=18, color=rx.cond(stamped, "white", INK_SOFT)),
+                style={
+                    "width": "44px",
+                    "height": "44px",
+                    "border_radius": "999px",
+                    "display": "flex",
+                    "align_items": "center",
+                    "justify_content": "center",
+                    "background": rx.cond(stamped, f"linear-gradient(135deg, {TEAL}, {TEAL_DEEP})", SAND),
+                },
+            ),
             style={
-                "width": "44px",
-                "height": "44px",
+                "width": "52px",
+                "height": "52px",
                 "border_radius": "999px",
                 "display": "flex",
                 "align_items": "center",
                 "justify_content": "center",
-                "background": rx.cond(stamped, TEAL, SAND),
-                "border": f"2px dashed {rx.cond(stamped, TEAL, LINE)}",
+                "background": rx.cond(stamped, GOLD, "transparent"),
+                "border": rx.cond(stamped, "none", f"2px dashed {LINE}"),
             },
         ),
         rx.el.p(
@@ -1470,12 +1577,15 @@ def passport_badge(item):
 def passport_strip():
     return card(
         rx.el.div(
-            section_label("shield-check", t("passport_title"), GOLD),
+            rx.el.span(
+                f"{t('stamps_collected')}:",
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600", "color": INK_SOFT},
+            ),
             rx.el.span(
                 RawiState.passport_count_label,
                 style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": GOLD},
             ),
-            style={"display": "flex", "align_items": "center", "justify_content": "space-between"},
+            style={"display": "flex", "align_items": "center", "gap": "6px", "margin_bottom": "12px"},
         ),
         rx.el.p(
             t("passport_hint"),
@@ -1497,6 +1607,7 @@ def passport_tab():
 
 def favorites_tab():
     return rx.el.div(
+        screen_title("heart", "your_saved_stories", RUST),
         rx.cond(
             RawiState.favorite_cards.length() == 0,
             rx.el.p(
