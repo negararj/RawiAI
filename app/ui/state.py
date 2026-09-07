@@ -49,6 +49,21 @@ _VOICE_INPUT_SCRIPT = """
 """
 
 
+def _describe_source(source: str) -> tuple[str, bool]:
+    """(subtitle, verified) for a timeline row, derived from its real
+    source tag - never invents an API name for a non-CAMARA step."""
+    if "-camara-" in source:
+        api_name = source.split("-camara-", 1)[1].replace("-", " ").title()
+        return f"CAMARA {api_name}", "error" not in source
+    if source.startswith("gemini:"):
+        return "Gemini AI", True
+    if "fallback" in source:
+        return "Local Fallback Logic", "error" not in source
+    if "offline" in source or "cache" in source:
+        return "Offline Cache", True
+    return source, "error" not in source
+
+
 class RawiState(rx.State):
     """State shared by the mobile UI."""
 
@@ -167,11 +182,10 @@ class RawiState(rx.State):
         return site["alt_name_ar"] if self.is_ar else site["alt_name_en"]
 
     @rx.var
-    def all_sites_picker(self) -> list[dict[str, str]]:
-        return [
-            {"id": site["id"], "name": site["name_ar"] if self.is_ar else site["name_en"]}
-            for site in DEMO_SITES.values()
-        ]
+    def selected_site_teaser(self) -> str:
+        site = get_site(self.selected_site_id)
+        return site["teaser_ar"] if self.is_ar else site["teaser_en"]
+
 
     # -----------------------------------------------------------------
     # Browse tab: country -> city -> landmark
@@ -446,6 +460,8 @@ JSON.stringify({
                 "step": item["step"],
                 "detail": item["detail"],
                 "source": item["source"],
+                "api_label": _describe_source(item["source"])[0],
+                "verified": "true" if _describe_source(item["source"])[1] else "false",
             }
             for item in result["timeline"]
         ]

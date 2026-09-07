@@ -22,6 +22,8 @@ AL_HISN_FORT = {
     "alt_name_ar": "قلعة الحصن - المسار الشرقي الهادئ",
     "alt_lat": 25.3578,
     "alt_lon": 55.3835,
+    "teaser_en": "Step through the doors of a 19th-century fort that once watched over Sharjah's old city.",
+    "teaser_ar": "ادخل من أبواب قلعة يعود تاريخها إلى القرن التاسع عشر، كانت تحرس مدينة الشارقة القديمة.",
 }
 
 QASR_AL_HOSN = {
@@ -42,6 +44,8 @@ QASR_AL_HOSN = {
     "alt_name_ar": "قصر الحصن - مسار الحديقة الهادئ",
     "alt_lat": 24.4778,
     "alt_lon": 54.3718,
+    "teaser_en": "Once a watchtower guarding the island's only freshwater well, now the living memory of how Abu Dhabi began.",
+    "teaser_ar": "كانت برجًا للمراقبة يحرس بئر المياه العذبة الوحيد في الجزيرة، واليوم هي الذاكرة الحية لبداية أبوظبي.",
 }
 
 AL_FAHIDI = {
@@ -62,6 +66,8 @@ AL_FAHIDI = {
     "alt_name_ar": "الفهيدي - مسار الخور الهادئ",
     "alt_lat": 25.2651,
     "alt_lon": 55.2989,
+    "teaser_en": "Wind towers, coral-and-gypsum walls, and lanes once home to Dubai Creek's pearl-trading merchants.",
+    "teaser_ar": "أبراج الرياح وجدران المرجان والجص وأزقة كانت موطنًا لتجار اللؤلؤ على خور دبي.",
 }
 
 
