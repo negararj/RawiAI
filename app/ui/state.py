@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from datetime import date
 
 import reflex as rx
 
@@ -79,6 +80,7 @@ class RawiState(rx.State):
     favorite_ids: list[str] = []
     cached_stories: dict[str, str] = {}
     stamped_ids: list[str] = []
+    stamped_dates: dict[str, str] = {}
     is_offline_view: bool = False
 
     started: bool = False
@@ -197,6 +199,13 @@ class RawiState(rx.State):
         for site in DEMO_SITES.values():
             seen[site["country_code"]] = site["country_ar"] if self.is_ar else site["country_en"]
         return [{"code": code, "label": label} for code, label in seen.items()]
+
+    @rx.var
+    def selected_country_label(self) -> str:
+        for country in self.available_countries:
+            if country["code"] == self.selected_country_code:
+                return country["label"]
+        return ""
 
     @rx.var
     def available_cities(self) -> list[dict[str, str]]:
@@ -337,13 +346,19 @@ class RawiState(rx.State):
         stamps = data.get("stamps") or []
         self.stamped_ids = [site_id for site_id in stamps if site_id in DEMO_SITES]
 
+        stamp_dates = data.get("stamp_dates") or {}
+        self.stamped_dates = {
+            site_id: value for site_id, value in stamp_dates.items() if site_id in DEMO_SITES and isinstance(value, str)
+        }
+
     def load_local_data(self):
         return rx.call_script(
             """
 JSON.stringify({
   favorites: JSON.parse(localStorage.getItem('rawi_favorites') || '[]'),
   stories: JSON.parse(localStorage.getItem('rawi_offline_stories') || '{}'),
-  stamps: JSON.parse(localStorage.getItem('rawi_stamps') || '[]')
+  stamps: JSON.parse(localStorage.getItem('rawi_stamps') || '[]'),
+  stamp_dates: JSON.parse(localStorage.getItem('rawi_stamp_dates') || '{}')
 })
 """,
             callback=RawiState.hydrate_local_data,
@@ -352,6 +367,7 @@ JSON.stringify({
     def _persist_stamps(self):
         return rx.call_script(
             f"localStorage.setItem('rawi_stamps', {json.dumps(json.dumps(self.stamped_ids))});"
+            f"localStorage.setItem('rawi_stamp_dates', {json.dumps(json.dumps(self.stamped_dates))});"
         )
 
     @rx.var
@@ -360,6 +376,8 @@ JSON.stringify({
             {
                 "id": site["id"],
                 "name": site["name_ar"] if self.is_ar else site["name_en"],
+                "code": site["stamp_code"],
+                "date": self.stamped_dates.get(site["id"], ""),
                 "stamped": "true" if site["id"] in self.stamped_ids else "false",
             }
             for site in DEMO_SITES.values()
@@ -367,7 +385,10 @@ JSON.stringify({
 
     @rx.var
     def passport_count_label(self) -> str:
-        return f"{len(self.stamped_ids)}/{len(DEMO_SITES)}"
+        count, total = len(self.stamped_ids), len(DEMO_SITES)
+        if self.is_ar:
+            return f"{count} من {total} مواقع تمت زيارتها"
+        return f"{count} of {total} sites visited"
 
     @rx.var
     def passport_progress_pct(self) -> str:
@@ -512,4 +533,5 @@ JSON.stringify({
         # Stamp the passport for this landmark on a real, completed visit.
         if self.answer and self.selected_site_id not in self.stamped_ids:
             self.stamped_ids = [*self.stamped_ids, self.selected_site_id]
+            self.stamped_dates = {**self.stamped_dates, self.selected_site_id: date.today().strftime("%b %d, %Y")}
             yield self._persist_stamps()

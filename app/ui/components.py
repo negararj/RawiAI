@@ -1558,8 +1558,21 @@ def screen_title(icon: str, key: str, color: str = TEAL):
     )
 
 
+def browse_breadcrumb():
+    return rx.cond(
+        RawiState.selected_country_code != "",
+        rx.el.div(
+            rx.el.span(RawiState.selected_country_label, style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT}),
+            rx.icon(tag="chevron-right", size=12, color=INK_SOFT),
+            rx.el.span(t("select_city"), style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "font_weight": "700"}),
+            style={"display": "flex", "align_items": "center", "gap": "4px"},
+        ),
+    )
+
+
 def browse_tab():
     return rx.el.div(
+        browse_breadcrumb(),
         screen_title("map", "explore_cities"),
         card(
             section_label("map-pin", t("select_country"), TEAL),
@@ -1596,42 +1609,53 @@ def passport_badge(item):
     stamped = item["stamped"] == "true"
     return rx.el.div(
         rx.el.div(
-            rx.el.div(
-                rx.icon(tag=rx.cond(stamped, "award", "lock"), size=18, color=rx.cond(stamped, "white", INK_SOFT)),
-                style={
-                    "width": "44px",
-                    "height": "44px",
-                    "border_radius": "999px",
-                    "display": "flex",
-                    "align_items": "center",
-                    "justify_content": "center",
-                    "background": rx.cond(stamped, f"linear-gradient(135deg, {TEAL}, {TEAL_DEEP})", SAND),
-                },
+            rx.cond(
+                stamped,
+                rx.el.span(
+                    item["code"],
+                    style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "700", "color": TEAL},
+                ),
+                rx.icon(tag="lock", size=16, color=INK_SOFT),
             ),
             style={
-                "width": "52px",
-                "height": "52px",
+                "width": "48px",
+                "height": "48px",
                 "border_radius": "999px",
                 "display": "flex",
                 "align_items": "center",
                 "justify_content": "center",
-                "background": rx.cond(stamped, GOLD, "transparent"),
-                "border": rx.cond(stamped, "none", f"2px dashed {LINE}"),
+                "border": f"2px dashed {rx.cond(stamped, TEAL, LINE)}",
+                "background": rx.cond(stamped, TEAL_SOFT, "transparent"),
+                "flex_shrink": "0",
             },
         ),
         rx.el.p(
             item["name"],
             style={
                 "font_family": FONT_BODY,
-                "font_size": "10px",
-                "font_weight": "600",
+                "font_size": "12px",
+                "font_weight": "700",
                 "color": rx.cond(stamped, INK, INK_SOFT),
                 "text_align": "center",
-                "margin": "4px 0 0 0",
-                "max_width": "70px",
+                "margin": "8px 0 0 0",
             },
         ),
-        style={"display": "flex", "flex_direction": "column", "align_items": "center"},
+        rx.cond(
+            stamped,
+            rx.el.p(
+                item["date"],
+                style={"font_family": FONT_BODY, "font_size": "10px", "color": INK_SOFT, "margin": "2px 0 0 0"},
+            ),
+        ),
+        style={
+            "display": "flex",
+            "flex_direction": "column",
+            "align_items": "center",
+            "padding": "14px 10px",
+            "border_radius": "14px",
+            "border": f"1px solid {LINE}",
+            "background": rx.cond(stamped, CARD, SAND),
+        },
     )
 
 
@@ -1639,22 +1663,18 @@ def passport_strip():
     return card(
         rx.el.div(
             rx.el.span(
-                f"{t('stamps_collected')}:",
-                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "600", "color": INK_SOFT},
+                t("stamps_collected"),
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": INK_SOFT},
             ),
             rx.el.span(
                 RawiState.passport_count_label,
-                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": GOLD},
+                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": TEAL},
             ),
-            style={"display": "flex", "align_items": "center", "gap": "6px", "margin_bottom": "12px"},
-        ),
-        rx.el.p(
-            t("passport_hint"),
-            style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "0 0 12px 0"},
+            style={"display": "flex", "align_items": "center", "justify_content": "space-between", "margin_bottom": "12px"},
         ),
         rx.el.div(
             rx.foreach(RawiState.passport_cards, passport_badge),
-            style={"display": "flex", "justify_content": "space-around", "width": "100%"},
+            style={"display": "grid", "grid_template_columns": "1fr 1fr", "gap": "10px", "width": "100%"},
         ),
         rx.el.div(
             rx.el.div(
@@ -1680,9 +1700,24 @@ def passport_strip():
 
 def passport_tab():
     return rx.el.div(
-        screen_title("award", "passport_title", GOLD),
+        rx.el.div(
+            screen_title("award", "passport_title", GOLD),
+            rx.el.p(
+                t("passport_hint"),
+                style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "4px 0 0 0"},
+            ),
+            style={
+                "width": "100%",
+                "padding": "14px 16px",
+                "border_radius": "14px",
+                "border": f"2px dashed {GOLD}",
+                "background": CARD,
+                "box_sizing": "border-box",
+                "margin_bottom": "4px",
+            },
+        ),
         passport_strip(),
-        style={"width": "100%"},
+        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
     )
 
 

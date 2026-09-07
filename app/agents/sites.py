@@ -24,6 +24,8 @@ AL_HISN_FORT = {
     "alt_lon": 55.3835,
     "teaser_en": "Step through the doors of a 19th-century fort that once watched over Sharjah's old city.",
     "teaser_ar": "ادخل من أبواب قلعة يعود تاريخها إلى القرن التاسع عشر، كانت تحرس مدينة الشارقة القديمة.",
+    # Real IATA code for the site's city - used as the passport stamp code.
+    "stamp_code": "SHJ",
 }
 
 QASR_AL_HOSN = {
@@ -46,6 +48,7 @@ QASR_AL_HOSN = {
     "alt_lon": 54.3718,
     "teaser_en": "Once a watchtower guarding the island's only freshwater well, now the living memory of how Abu Dhabi began.",
     "teaser_ar": "كانت برجًا للمراقبة يحرس بئر المياه العذبة الوحيد في الجزيرة، واليوم هي الذاكرة الحية لبداية أبوظبي.",
+    "stamp_code": "AUH",
 }
 
 AL_FAHIDI = {
@@ -68,6 +71,7 @@ AL_FAHIDI = {
     "alt_lon": 55.2989,
     "teaser_en": "Wind towers, coral-and-gypsum walls, and lanes once home to Dubai Creek's pearl-trading merchants.",
     "teaser_ar": "أبراج الرياح وجدران المرجان والجص وأزقة كانت موطنًا لتجار اللؤلؤ على خور دبي.",
+    "stamp_code": "DXB",
 }
 
 
