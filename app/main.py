@@ -16,8 +16,10 @@ logger = logging.getLogger(__name__)
 app = rx.App(
     stylesheets=[
         "https://fonts.googleapis.com/css2?"
-        "family=Reem+Kufi:wght@400..700"
+        "family=Baloo+2:wght@500;600;700;800"
+        "&family=Reem+Kufi:wght@400..700"
         "&family=Tajawal:wght@400;500;700;800"
+        "&family=Inter:wght@400;500;600;700"
         "&family=Amiri:ital,wght@0,400;0,700;1,400"
         "&display=swap",
         "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",

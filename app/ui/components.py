@@ -12,15 +12,17 @@ _HAS_MULTIPLE_COUNTRIES = len({site["country_code"] for site in DEMO_SITES.value
 # ---------------------------------------------------------------------------
 
 INK = "#2B1D14"
-INK_SOFT = "#7C6650"
-SAND = "#F6EAD2"
+INK_SOFT = "#614D3C"
+SAND = "#F7ECD8"
 CARD = "#FFFBF2"
 LINE = "#E4D2AC"
+LINE_DEEP = "#D3C2AB"
 RUST = "#AE5A2E"
 RUST_DARK = "#7F3E1E"
+RUST_TINT = "rgba(174, 90, 46, 0.11)"
 TEAL = "#1F7A72"
 TEAL_DEEP = "#0F4A45"
-TEAL_SOFT = "#E1EFEC"
+TEAL_SOFT = "rgba(31, 122, 114, 0.12)"
 GOLD = "#C08A2E"
 GOLD_SOFT = "#EADFC0"
 
@@ -31,8 +33,8 @@ SKY_ROSE = "#E3A9A0"
 SKY_PEACH = "#F5DCC0"
 SKY_MINT = "#D8ECE6"
 
-FONT_HEADING = "'Barabara', 'Reem Kufi', 'Tajawal', sans-serif"
-FONT_BODY = "'Tajawal', 'Cairo', sans-serif"
+FONT_HEADING = "'Baloo 2', 'Reem Kufi', 'Tajawal', ui-rounded, sans-serif"
+FONT_BODY = "'Inter', 'Tajawal', system-ui, sans-serif"
 FONT_STORY = "'Amiri', 'Tajawal', serif"
 
 CARD_STYLE = {
@@ -196,12 +198,12 @@ def t(key: str):
 
 
 def t2(key: str):
-    """Both languages together, e.g. 'Explore Cities - المدن' - for section
+    """Both languages together, e.g. 'Explore Cities · المدن' - for section
     titles where showing both reads as a feature, not clutter."""
     en, ar = _STRINGS[key]
     if en == ar:
         return en
-    return f"{en} - {ar}"
+    return f"{en} · {ar}"
 
 
 # ---------------------------------------------------------------------------
@@ -211,25 +213,16 @@ def t2(key: str):
 
 def network_status_pill():
     return rx.el.div(
-        rx.el.span(style={"width": "6px", "height": "6px", "border_radius": "999px", "background": TEAL, "flex_shrink": "0"}),
-        rx.el.span(
-            t("network_ready"),
-            style={
-                "font_family": FONT_BODY,
-                "font_size": "10px",
-                "font_weight": "700",
-                "color": TEAL_DEEP,
-                "white_space": "nowrap",
-                "text_transform": "uppercase",
-                "letter_spacing": "0.3px",
-            },
-        ),
+        t("network_ready"),
         style={
-            "display": "flex",
-            "align_items": "center",
-            "gap": "5px",
-            "padding": "5px 10px",
-            "border_radius": "999px",
+            "font_family": FONT_BODY,
+            "font_size": "11px",
+            "font_weight": "700",
+            "color": TEAL,
+            "white_space": "nowrap",
+            "text_transform": "uppercase",
+            "padding": "4px 8px",
+            "border_radius": "12px",
             "background": TEAL_SOFT,
             "border": f"1px solid {TEAL}",
         },
@@ -302,23 +295,24 @@ def brand_header():
                 "RawiAI",
                 style={
                     "font_family": FONT_HEADING,
-                    "font_size": "20px",
-                    "font_weight": "700",
+                    "font_size": "24px",
+                    "font_weight": "800",
                     "color": INK,
                     "margin": "0",
-                    "letter_spacing": "0.3px",
                 },
             ),
             rx.el.p(
                 "راوي",
                 style={
                     "font_family": FONT_HEADING,
-                    "font_size": "13px",
-                    "color": TEAL_DEEP,
+                    "font_size": "12px",
+                    "font_weight": "700",
+                    "color": RUST,
                     "margin": "0",
+                    "text_transform": "uppercase",
                 },
             ),
-            style={"display": "flex", "flex_direction": "column", "gap": "0px"},
+            style={"display": "flex", "flex_direction": "column", "gap": "2px"},
         ),
         rx.el.div(
             network_status_pill(),
@@ -336,62 +330,42 @@ def brand_header():
 
 
 def hero():
+    heading = _STRINGS["hero_title"][0].replace("\n", " ")
+    heading_ar = _STRINGS["hero_title"][1].replace("\n", " ")
     return rx.el.div(
-        rx.el.div(
-            style={
-                "position": "absolute",
-                "top": "-6px",
-                "right": "0",
-                "width": "44px",
-                "height": "58px",
-                "background_image": "url('/illustrations/lantern.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.9",
-                "pointer_events": "none",
-                "animation": "rawiSway 5s ease-in-out infinite",
-                "transform_origin": "top center",
-            }
-        ),
-        rx.el.h1(
-            _STRINGS["hero_title"][0],
+        rx.el.p(
+            heading,
             style={
                 "font_family": FONT_HEADING,
-                "font_size": "24px",
+                "font_size": "16px",
                 "font_weight": "700",
-                "color": INK,
-                "line_height": "1.25",
+                "color": RUST,
                 "margin": "0",
-                "white_space": "pre-line",
                 "text_align": RawiState.text_align,
             },
         ),
         rx.el.p(
-            _STRINGS["hero_title"][1],
-            style={
-                "font_family": FONT_HEADING,
-                "font_size": "13px",
-                "font_weight": "500",
-                "color": INK_SOFT,
-                "line_height": "1.4",
-                "margin": "3px 0 6px 0",
-                "white_space": "pre-line",
-                "text_align": RawiState.text_align,
-            },
-        ),
-        rx.el.p(
-            t("hero_body"),
+            heading_ar,
             style={
                 "font_family": FONT_BODY,
-                "font_size": "12px",
-                "color": INK_SOFT,
-                "line_height": "1.6",
+                "font_size": "14px",
+                "font_weight": "600",
+                "color": INK,
                 "margin": "0",
                 "text_align": RawiState.text_align,
             },
         ),
-        star_divider(),
-        style={"display": "flex", "flex_direction": "column", "gap": "2px", "width": "100%", "position": "relative"},
+        style={
+            "display": "flex",
+            "flex_direction": "column",
+            "gap": "6px",
+            "width": "100%",
+            "background": CARD,
+            "border": f"1px solid {LINE}",
+            "border_radius": "16px",
+            "padding": "18px",
+            "box_sizing": "border-box",
+        },
     )
 
 
@@ -459,53 +433,71 @@ def location_preview_card():
     """The mockup's persistent "Active Location" section - visible before
     the story even starts, using only real static content (the site's
     hand-drawn illustration, name, and a one-line teaser condensed from the
-    site's actual narration text) plus honest status copy: a neutral hint
-    pre-verification, the real CAMARA geofence result afterward."""
-    return card(
+    site's actual narration text) plus honest status copy: the real CAMARA
+    geofence result once the story has actually started, instead of a
+    fabricated distance badge."""
+    return rx.el.div(
+        screen_title("active_location"),
         rx.el.div(
-            site_illustration(),
-            style={"border_radius": "14px", "overflow": "hidden", "margin_bottom": "12px", "border": f"1px solid {LINE}"},
-        ),
-        section_label("map-pin", t("active_location"), TEAL),
-        rx.el.p(
-            RawiState.selected_site_name,
-            style={
-                "font_family": FONT_HEADING,
-                "font_size": "18px",
-                "font_weight": "700",
-                "color": INK,
-                "margin": "0",
-                "text_align": RawiState.text_align,
-            },
-        ),
-        rx.el.p(
-            RawiState.selected_site_teaser,
-            style={
-                "font_family": FONT_BODY,
-                "font_size": "12px",
-                "color": INK_SOFT,
-                "margin": "4px 0 0 0",
-                "line_height": "1.5",
-                "text_align": RawiState.text_align,
-            },
-        ),
-        rx.cond(
-            RawiState.started,
+            rx.el.div(site_illustration(), style={"width": "100%", "height": "160px", "overflow": "hidden"}),
             rx.el.div(
-                rx.icon(tag="badge-check", size=13, color=TEAL),
-                rx.el.span(
-                    RawiState.geofence_status,
-                    style={"font_family": FONT_BODY, "font_size": "11px", "font_weight": "700", "color": TEAL_DEEP},
+                rx.el.div(
+                    rx.el.h3(
+                        RawiState.selected_site_name,
+                        style={
+                            "font_family": FONT_HEADING,
+                            "font_size": "18px",
+                            "font_weight": "700",
+                            "color": INK,
+                            "margin": "0",
+                        },
+                    ),
+                    rx.cond(
+                        RawiState.started,
+                        rx.el.span(
+                            t("verified_badge"),
+                            style={
+                                "font_family": FONT_BODY,
+                                "font_size": "11px",
+                                "font_weight": "700",
+                                "color": TEAL,
+                                "background": TEAL_SOFT,
+                                "padding": "4px 8px",
+                                "border_radius": "8px",
+                                "white_space": "nowrap",
+                            },
+                        ),
+                    ),
+                    style={
+                        "display": "flex",
+                        "align_items": "center",
+                        "justify_content": "space-between",
+                        "gap": "8px",
+                        "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+                    },
                 ),
-                style={
-                    "display": "flex",
-                    "align_items": "center",
-                    "gap": "6px",
-                    "margin_top": "8px",
-                    "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
-                },
+                rx.el.p(
+                    RawiState.selected_site_teaser,
+                    style={
+                        "font_family": FONT_BODY,
+                        "font_size": "13px",
+                        "color": INK_SOFT,
+                        "margin": "0",
+                        "line_height": "1.4",
+                        "text_align": RawiState.text_align,
+                    },
+                ),
+                style={"padding": "16px", "display": "flex", "flex_direction": "column", "gap": "10px"},
             ),
+            style={
+                "background": CARD,
+                "border": f"1px solid {LINE}",
+                "border_radius": "16px",
+                "overflow": "hidden",
+                "width": "100%",
+            },
         ),
+        style={"display": "flex", "flex_direction": "column", "gap": "10px", "width": "100%"},
     )
 
 
@@ -514,22 +506,18 @@ def location_preview_card():
 # ---------------------------------------------------------------------------
 
 
-def trust_chip(icon: str, label, active):
+def trust_chip(label, active):
     return rx.el.div(
-        rx.icon(tag=icon, size=12, color=rx.cond(active, TEAL, INK_SOFT)),
-        rx.el.span(
-            label,
-            style={"font_family": FONT_BODY, "font_size": "11px", "font_weight": "700", "color": rx.cond(active, TEAL, INK_SOFT)},
-        ),
-        rx.cond(active, rx.icon(tag="check", size=11, color=TEAL)),
+        rx.el.span(label, style={"font_family": FONT_BODY, "font_size": "11px", "font_weight": "700"}),
+        rx.cond(active, rx.icon(tag="check", size=11, color="white")),
         style={
             "display": "flex",
             "align_items": "center",
             "gap": "4px",
-            "padding": "6px 8px",
-            "border_radius": "999px",
-            "background": "transparent",
-            "border": f"1px solid {rx.cond(active, TEAL, LINE)}",
+            "padding": "6px 10px",
+            "border_radius": "10px",
+            "background": rx.cond(active, TEAL, LINE),
+            "color": rx.cond(active, "white", INK_SOFT),
             "transition": "all 0.2s ease",
             "flex": "1",
             "justify_content": "center",
@@ -539,11 +527,11 @@ def trust_chip(icon: str, label, active):
 
 def trust_rail():
     return rx.el.div(
-        trust_chip("shield-check", t("identity"), RawiState.step_identity),
-        trust_chip("map-pin", t("presence"), RawiState.step_presence),
-        trust_chip("radio-tower", t("network"), RawiState.step_network),
-        trust_chip("gauge", t("qod"), RawiState.step_qos),
-        style={"display": "flex", "gap": "8px", "width": "100%"},
+        trust_chip(t("identity"), RawiState.step_identity),
+        trust_chip(t("presence"), RawiState.step_presence),
+        trust_chip(t("network"), RawiState.step_network),
+        trust_chip(t("qod"), RawiState.step_qos),
+        style={"display": "flex", "gap": "6px", "width": "100%", "flex_wrap": "wrap"},
     )
 
 
@@ -691,19 +679,21 @@ def arrival_alert_button():
 def voice_input_button():
     active = RawiState.is_listening
     return rx.el.button(
-        rx.icon(tag="mic", size=16, color=rx.cond(active, "white", RUST)),
+        rx.icon(tag="mic", size=18, color="white"),
         on_click=RawiState.start_voice_input,
         disabled=active,
         style={
             "display": "flex",
             "align_items": "center",
             "justify_content": "center",
-            "width": "44px",
+            "width": "42px",
+            "height": "42px",
             "flex_shrink": "0",
-            "border": f"1px solid {rx.cond(active, RUST, LINE)}",
-            "border_radius": "12px",
-            "background": rx.cond(active, RUST, SAND),
+            "border": "none",
+            "border_radius": "14px",
+            "background": RUST,
             "cursor": "pointer",
+            "animation": rx.cond(active, "pulse 1.2s ease-in-out infinite", "none"),
         },
     )
 
@@ -716,36 +706,46 @@ def voice_input_button():
 def ask_card():
     return rx.el.div(
         rx.el.div(
-            rx.icon(tag="search", size=15, color=INK_SOFT, style={"flex_shrink": "0"}),
-            rx.el.input(
-                value=RawiState.question,
-                on_change=RawiState.set_question,
-                placeholder=t("question_placeholder"),
-                dir=RawiState.dir,
+            rx.el.div(
+                rx.icon(tag="search", size=15, color=INK_SOFT, style={"flex_shrink": "0"}),
+                rx.el.input(
+                    value=RawiState.question,
+                    on_change=RawiState.set_question,
+                    placeholder=t("question_placeholder"),
+                    dir=RawiState.dir,
+                    style={
+                        "font_family": FONT_BODY,
+                        "flex": "1",
+                        "min_width": "0",
+                        "border": "none",
+                        "background": "transparent",
+                        "font_size": "14px",
+                        "color": INK,
+                        "outline": "none",
+                        "text_align": RawiState.text_align,
+                    },
+                ),
+                rx.el.span(RawiState.language, id="rawi-language", style={"display": "none"}),
                 style={
-                    "font_family": FONT_BODY,
+                    "display": "flex",
+                    "align_items": "center",
+                    "gap": "10px",
                     "flex": "1",
                     "min_width": "0",
-                    "border": "none",
-                    "background": "transparent",
-                    "font_size": "13px",
-                    "color": INK,
-                    "outline": "none",
-                    "text_align": RawiState.text_align,
+                    "padding": "12px",
+                    "border_radius": "14px",
+                    "border": f"1px solid {LINE}",
+                    "background": CARD,
+                    "box_sizing": "border-box",
+                    "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
                 },
             ),
             voice_input_button(),
-            rx.el.span(RawiState.language, id="rawi-language", style={"display": "none"}),
             style={
                 "display": "flex",
                 "align_items": "center",
                 "gap": "8px",
                 "width": "100%",
-                "padding": "8px 14px",
-                "border_radius": "14px",
-                "border": f"1px solid {LINE}",
-                "background": SAND,
-                "box_sizing": "border-box",
                 "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
             },
         ),
@@ -756,16 +756,16 @@ def ask_card():
             style={
                 "font_family": FONT_BODY,
                 "width": "100%",
-                "padding": "13px",
+                "padding": "16px",
                 "border": "none",
                 "border_radius": "14px",
-                "background": f"linear-gradient(135deg, {RUST}, {RUST_DARK})",
+                "background": RUST,
                 "color": "white",
-                "font_size": "14px",
+                "font_size": "16px",
                 "font_weight": "700",
                 "cursor": rx.cond(RawiState.is_loading, "default", "pointer"),
                 "opacity": rx.cond(RawiState.is_loading, "0.75", "1"),
-                "box_shadow": "0 8px 18px rgba(174, 90, 46, 0.35)",
+                "box_shadow": "0 4px 4px rgba(174, 90, 46, 0.2)",
                 "animation": rx.cond(
                     RawiState.is_loading | RawiState.started,
                     "none",
@@ -1559,13 +1559,19 @@ def landmark_card(item):
     )
 
 
-def screen_title(icon: str, key: str, color: str = TEAL):
-    """A bilingual screen heading, e.g. 'Explore Cities - المدن' - shown
+def screen_title(key: str):
+    """A bilingual screen heading, e.g. 'Explore Cities · المدن' - shown
     above a tab's content regardless of the active language toggle."""
-    return rx.el.div(
-        rx.icon(tag=icon, size=18, color=color),
-        rx.el.h2(t2(key), style={"font_family": FONT_HEADING, "font_size": "18px", "font_weight": "700", "color": INK, "margin": "0"}),
-        style={"display": "flex", "align_items": "center", "gap": "8px", "margin_bottom": "4px"},
+    return rx.el.h2(
+        t2(key),
+        style={
+            "font_family": FONT_HEADING,
+            "font_size": "20px",
+            "font_weight": "700",
+            "color": INK,
+            "margin": "0",
+            "text_align": RawiState.text_align,
+        },
     )
 
 
@@ -1582,7 +1588,7 @@ def browse_breadcrumb():
 
 
 def browse_tab():
-    children = [browse_breadcrumb(), screen_title("map", "explore_cities")]
+    children = [browse_breadcrumb(), screen_title("explore_cities")]
     if _HAS_MULTIPLE_COUNTRIES:
         children.append(
             card(
@@ -1713,7 +1719,7 @@ def passport_strip():
 def passport_tab():
     return rx.el.div(
         rx.el.div(
-            screen_title("award", "passport_title", GOLD),
+            screen_title("passport_title"),
             rx.el.p(
                 t("passport_hint"),
                 style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "4px 0 0 0"},
@@ -1735,7 +1741,7 @@ def passport_tab():
 
 def favorites_tab():
     return rx.el.div(
-        screen_title("heart", "your_saved_stories", RUST),
+        screen_title("your_saved_stories"),
         rx.cond(
             RawiState.favorite_cards.length() == 0,
             rx.el.p(

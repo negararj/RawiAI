@@ -5,12 +5,14 @@ import reflex as rx
 from app.ui.components import (
     FONT_BODY,
     FONT_HEADING,
+    GOLD,
     INK,
     INK_SOFT,
     LINE,
     RUST,
     RUST_DARK,
-    SKY_MINT,
+    SAND,
+    TEAL,
     TEAL_DEEP,
     TEAL_SOFT,
     arrival_alert_button,
@@ -34,114 +36,55 @@ from app.ui.components import (
 )
 from app.ui.state import RawiState
 
-# An interlocking-circles lattice - the classic Islamic geometric motif seen
-# on the pitch deck's backgrounds. Circles centered at each tile corner
-# (radius = half the tile size) plus one centered in the tile connect
-# seamlessly with their neighbors when repeated, weaving into a continuous
-# mesh rather than a grid of separate rings.
-_PATTERN_SVG = (
-    "data:image/svg+xml;utf8,"
-    "<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'>"
-    "<g fill='none' stroke='%23C08A2E' stroke-width='1.5' opacity='0.11'>"
-    "<circle cx='0' cy='0' r='42'/>"
-    "<circle cx='84' cy='0' r='42'/>"
-    "<circle cx='0' cy='84' r='42'/>"
-    "<circle cx='84' cy='84' r='42'/>"
-    "<circle cx='42' cy='42' r='42'/>"
-    "</g></svg>"
+# The exact background dot-grid from the Figma export's `.screen::before`
+# rule: a radial-gradient ring repeated on a 56px tile, ink-tinted at 6%
+# opacity, blended with multiply.
+_PATTERN_BACKGROUND = (
+    "radial-gradient(circle at center, transparent 0px 9px, "
+    "rgba(43, 29, 20, 0.06) 9.5px 10.5px, transparent 11px)"
 )
 
-def desert_scene():
-    """A camel ambling low along the bottom of the viewport - the only
-    "foreground" background element; everything else in skyline_bar()
-    blends in at low opacity instead."""
-    return rx.el.div(
-        style={
-            "position": "fixed",
-            "bottom": "8px",
-            "left": "-15%",
-            "width": "150px",
-            "height": "86px",
-            "background_image": "url('/illustrations/camel.png')",
-            "background_repeat": "no-repeat",
-            "background_size": "contain",
-            "opacity": "0.85",
-            "pointer_events": "none",
-            "z_index": "0",
-            "animation": "rawiWalk 40s linear infinite",
-        }
+# The three decorative line-art motifs from the Figma export's <symbol>
+# defs (d-tree-palm, d-ring-crosshair, d-ring-wide) - reproduced with the
+# exact path data so the background matches pixel-for-pixel.
+_DECO_TREE_PATH = (
+    "M33.3 46.7H20L16.7 40.8 13.3 46.7H6.7C6.7 30.6 14.9 17.5 25 17.5S43.3 30.6 43.3 46.7"
+    "C45 58.3 53.3 96.3 46.7 128.3H33.3C36.1 116.7 38.3 105 36.7 90.4"
+    "M43.3 41.7C46.7 37.3 50.8 35 55 35c10.1 0 18.3 13.1 18.3 29.2H63.3l-3.3-5.8-3.3 5.8H46.7"
+    "M19.6 56.6C12.5 69.2 12 88.6 18.5 100l14.1-24.8 11.8-20.6C37.9 43.2 26.8 44.1 19.6 56.6z"
+)
+_DECO_RING_CROSSHAIR_PATH = (
+    "M75 37.5L45 62.5M45 37.5L75 62.5"
+    "M110 50c0 23-22.4 41.7-50 41.7S10 73 10 50 32.4 8.3 60 8.3 110 27 110 50z"
+)
+_DECO_RING_WIDE_PATH = (
+    "M150 22.5L90 37.5M90 22.5l60 15"
+    "M220 30c0 13.8-44.8 25-100 25S20 43.8 20 30 64.8 5 120 5s100 11.2 100 25z"
+)
+
+
+def _deco_svg(path: str, view_box: str, color: str, style: dict):
+    return rx.el.svg(
+        rx.el.path(d=path, stroke=color, stroke_width="2", fill="none", stroke_linecap="round"),
+        view_box=view_box,
+        style={"position": "fixed", "pointer_events": "none", "z_index": "0", **style},
     )
 
 
-def skyline_bar():
-    """A low-opacity skyline vignette along the bottom of the viewport,
-    blended into the background rather than competing with foreground
-    text: the skyline centered, the Burj Al Arab to its right, and the
-    palm tree to its left."""
+def screen_decorations():
+    """The Figma export's three background motifs (palm tree, gold
+    crosshair-ring, rust wide-ring), positioned exactly as specified."""
     return rx.el.div(
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "0",
-                "left": "50%",
-                "transform": "translateX(-50%)",
-                "width": "210px",
-                "height": "95px",
-                "background_image": "url('/illustrations/skyline.png')",
-                "background_repeat": "no-repeat",
-                "background_position": "center bottom",
-                "background_size": "contain",
-                "opacity": "0.3",
-                "pointer_events": "none",
-                "z_index": "0",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "0",
-                "right": "6%",
-                "width": "46px",
-                "height": "120px",
-                "background_image": "url('/illustrations/burj-al-arab.png')",
-                "background_repeat": "no-repeat",
-                "background_position": "center bottom",
-                "background_size": "contain",
-                "opacity": "0.3",
-                "pointer_events": "none",
-                "z_index": "0",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "0",
-                "left": "4%",
-                "width": "80px",
-                "height": "134px",
-                "background_image": "url('/illustrations/palm.png')",
-                "background_repeat": "no-repeat",
-                "background_position": "center bottom",
-                "background_size": "contain",
-                "opacity": "0.3",
-                "pointer_events": "none",
-                "z_index": "0",
-            }
-        ),
+        _deco_svg(_DECO_TREE_PATH, "0 0 80 140", TEAL, {"width": "80px", "height": "140px", "left": "-10px", "bottom": "80px"}),
+        _deco_svg(_DECO_RING_CROSSHAIR_PATH, "0 0 120 100", GOLD, {"width": "120px", "height": "100px", "right": "-20px", "bottom": "120px"}),
+        _deco_svg(_DECO_RING_WIDE_PATH, "0 0 240 60", RUST, {"width": "240px", "height": "60px", "left": "0", "bottom": "140px"}),
     )
+
+
 
 
 _GLOBAL_ANIMATIONS = """
 <style>
-/* English display headings, matching the pitch deck. Only in the font
-   stack (see FONT_HEADING) - the browser falls back to Reem Kufi per
-   glyph for any character Barabara doesn't cover, so Arabic headings are
-   unaffected without any language-conditional logic. */
-@font-face {
-  font-family: 'Barabara';
-  src: url('/fonts/BARABARA-final.otf') format('opentype');
-  font-display: swap;
-}
 @keyframes rawiSway {
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(3deg); }
@@ -157,6 +100,10 @@ _GLOBAL_ANIMATIONS = """
 @keyframes rawiWalk {
   0% { left: -15%; }
   100% { left: 115%; }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(174, 90, 46, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(174, 90, 46, 0); }
 }
 </style>
 """
@@ -318,8 +265,8 @@ def splash_screen():
             "display": "flex",
             "align_items": "center",
             "justify_content": "center",
-            "background": f"{SKY_MINT} url(\"{_PATTERN_SVG}\")",
-            "background_size": "84px 84px",
+            "background": f"{SAND} {_PATTERN_BACKGROUND}",
+            "background_size": "56px 56px",
             "animation": "rawiSplashOut 0.6s ease 1.4s forwards",
         },
     )
@@ -329,9 +276,9 @@ PAGE_STYLE = {
     "width": "100%",
     "display": "flex",
     "justify_content": "center",
-    "background": f"#F7ECD8 url(\"{_PATTERN_SVG}\")",
+    "background": f"{SAND} {_PATTERN_BACKGROUND}",
     "background_repeat": "repeat",
-    "background_size": "84px 84px",
+    "background_size": "56px 56px",
     "padding": "32px 16px",
     "box_sizing": "border-box",
 }
@@ -406,8 +353,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 """
         ),
         arrival_watch_script(),
-        desert_scene(),
-        skyline_bar(),
+        screen_decorations(),
         rx.html(_GLOBAL_ANIMATIONS),
         splash_screen(),
         # Ambient background track, toggled by music_toggle_button() in the
