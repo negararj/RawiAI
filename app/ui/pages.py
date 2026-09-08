@@ -36,12 +36,21 @@ from app.ui.components import (
 )
 from app.ui.state import RawiState
 
-# The exact background dot-grid from the Figma export's `.screen::before`
-# rule: a radial-gradient ring repeated on a 56px tile, ink-tinted at 6%
-# opacity, blended with multiply.
-_PATTERN_BACKGROUND = (
-    "radial-gradient(circle at center, transparent 0px 9px, "
-    "rgba(43, 29, 20, 0.06) 9.5px 10.5px, transparent 11px)"
+# An interlocking-circles lattice - the classic Islamic geometric motif seen
+# on the pitch deck's backgrounds. Circles centered at each tile corner
+# (radius = half the tile size) plus one centered in the tile connect
+# seamlessly with their neighbors when repeated, weaving into a continuous
+# mesh rather than a grid of separate rings.
+_PATTERN_SVG = (
+    "data:image/svg+xml;utf8,"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'>"
+    "<g fill='none' stroke='%23C08A2E' stroke-width='1.5' opacity='0.11'>"
+    "<circle cx='0' cy='0' r='42'/>"
+    "<circle cx='84' cy='0' r='42'/>"
+    "<circle cx='0' cy='84' r='42'/>"
+    "<circle cx='84' cy='84' r='42'/>"
+    "<circle cx='42' cy='42' r='42'/>"
+    "</g></svg>"
 )
 
 # The three decorative line-art motifs from the Figma export's <symbol>
@@ -265,8 +274,8 @@ def splash_screen():
             "display": "flex",
             "align_items": "center",
             "justify_content": "center",
-            "background": f"{SAND} {_PATTERN_BACKGROUND}",
-            "background_size": "56px 56px",
+            "background": f"{SAND} url(\"{_PATTERN_SVG}\")",
+            "background_size": "84px 84px",
             "animation": "rawiSplashOut 0.6s ease 1.4s forwards",
         },
     )
@@ -276,9 +285,9 @@ PAGE_STYLE = {
     "width": "100%",
     "display": "flex",
     "justify_content": "center",
-    "background": f"{SAND} {_PATTERN_BACKGROUND}",
+    "background": f"{SAND} url(\"{_PATTERN_SVG}\")",
     "background_repeat": "repeat",
-    "background_size": "56px 56px",
+    "background_size": "84px 84px",
     "padding": "32px 16px",
     "box_sizing": "border-box",
 }
