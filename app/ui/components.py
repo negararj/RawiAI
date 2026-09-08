@@ -969,6 +969,23 @@ def hegra_illustration():
     )
 
 
+def al_zubarah_illustration():
+    return _illustration_frame(
+        SKY_BLUE,
+        [_wave(16, 5, SKY_MINT, opacity=0.6), _wave(28, 6, GOLD, opacity=0.3), _wave(40, 4, SKY_MINT, opacity=0.4)],
+        rx.el.rect(x="30", y="95", width="50", height="35", fill=RUST_DARK, opacity="0.8"),
+        rx.el.rect(x="90", y="100", width="60", height="30", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="230", y="98", width="55", height="32", fill=RUST_DARK, opacity="0.75"),
+        rx.el.rect(x="0", y="112", width="320", height="8", fill=RUST_DARK, opacity="0.6"),
+        rx.el.rect(x="150", y="60", width="26", height="60", fill=RUST),
+        rx.el.rect(x="150", y="52", width="6", height="8", fill=RUST),
+        rx.el.rect(x="162", y="52", width="6", height="8", fill=RUST),
+        rx.el.rect(x="170", y="52", width="6", height="8", fill=RUST),
+        rx.el.line(x1="250", y1="90", x2="250", y2="120", stroke=INK, stroke_width="2"),
+        rx.el.polygon(points="250,90 250,118 274,118", fill=INK, opacity="0.6"),
+    )
+
+
 def site_illustration():
     return landmark_thumbnail(RawiState.selected_site_id)
 
@@ -983,6 +1000,7 @@ def landmark_thumbnail(site_id):
         ("al-fahidi", al_fahidi_illustration()),
         ("petra", petra_illustration()),
         ("hegra", hegra_illustration()),
+        ("al-zubarah", al_zubarah_illustration()),
         al_hisn_fort_illustration(),
     )
 

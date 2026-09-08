@@ -121,6 +121,29 @@ HEGRA = {
     "stamp_code": "ULH",
 }
 
+AL_ZUBARAH = {
+    "id": "al-zubarah",
+    "name_en": "Al Zubarah",
+    "name_ar": "الزبارة",
+    "country_code": "QA",
+    "country_en": "Qatar",
+    "country_ar": "قطر",
+    "city_code": "al-shamal",
+    "city_en": "Al Shamal",
+    "city_ar": "الشمال",
+    "lat": 25.9803,
+    "lon": 51.0331,
+    "radius_meters": 250,
+    "tags": ["archaeological", "unesco", "coastal", "pearling"],
+    "alt_name_en": "Al Zubarah - Quieter Seaward Wall",
+    "alt_name_ar": "الزبارة - سور الجهة البحرية الهادئ",
+    "alt_lat": 25.9831,
+    "alt_lon": 51.0298,
+    "teaser_en": "Qatar's only UNESCO site: a fortified 18th-century pearling and trading town, abandoned and remarkably preserved.",
+    "teaser_ar": "الموقع القطري الوحيد على قائمة اليونسكو: مدينة محصّنة للغوص واللؤلؤ والتجارة من القرن الثامن عشر، هُجرت وحُفظت بشكل استثنائي.",
+    "stamp_code": "DOH",
+}
+
 
 DEMO_SITES = {
     AL_HISN_FORT["id"]: AL_HISN_FORT,
@@ -128,6 +151,7 @@ DEMO_SITES = {
     AL_FAHIDI["id"]: AL_FAHIDI,
     PETRA["id"]: PETRA,
     HEGRA["id"]: HEGRA,
+    AL_ZUBARAH["id"]: AL_ZUBARAH,
 }
 
 DEFAULT_SITE_ID = AL_HISN_FORT["id"]
