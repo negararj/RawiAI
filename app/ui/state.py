@@ -477,6 +477,7 @@ JSON.stringify({
         result = run_demo_flow(effective_question, language=self.language, site_id=self.selected_site_id)
 
         self.camara_calls = result["camara_calls"]
+        _raw_timeline = result["timeline"]
         self.timeline = [
             {
                 "step": item["step"],
@@ -484,8 +485,9 @@ JSON.stringify({
                 "source": item["source"],
                 "api_label": _describe_source(item["source"])[0],
                 "verified": "true" if _describe_source(item["source"])[1] else "false",
+                "is_last": "true" if idx == len(_raw_timeline) - 1 else "false",
             }
-            for item in result["timeline"]
+            for idx, item in enumerate(_raw_timeline)
         ]
         self.flow_summary = result["summary"]
 

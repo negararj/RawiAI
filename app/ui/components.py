@@ -139,6 +139,7 @@ _STRINGS = {
         "نحن لا نعتمد على GPS المتصفح فقط - كل خطوة أدناه مؤكدة عبر استدعاء فعلي لواجهات نوكيا CAMARA.",
     ),
     "ai_systems_verified": ("All Systems Verified", "جميع الأنظمة موثّقة"),
+    "verify_banner_sub": ("Presence verified via active UAE telecom node", "تم التحقق من الحضور عبر شبكة اتصالات إماراتية نشطة"),
     "active_verifications": ("Active Network Handshakes", "المصافحات الشبكية النشطة"),
     "verified_badge": ("Verified", "موثّق"),
     "error_badge": ("Error", "خطأ"),
@@ -178,11 +179,12 @@ _STRINGS = {
         "لا توجد مفضلات بعد. تصفّح المعالم واضغط على القلب لحفظ أحدها.",
     ),
     "recommended_for_you": ("You might also like", "قد يعجبك أيضًا"),
-    "passport_title": ("Your Heritage Passport", "جواز سفرك التراثي"),
+    "passport_title": ("Heritage Passport", "جواز السفر"),
     "passport_hint": (
-        "Complete a story at each landmark to collect its stamp.",
-        "أكمل حكاية كل معلم لتجمع ختمه.",
+        "Your official verification of physical presence",
+        "توثيقك الرسمي للحضور الفعلي",
     ),
+    "locked_label": ("Locked", "مقفل"),
     "available_offline": ("Available offline", "متاح دون اتصال"),
     "read_offline": ("Read Offline", "اقرأ دون اتصال"),
     "offline_notice": (
@@ -1277,20 +1279,18 @@ def network_card():
 
 
 def verified_badge(verified):
-    return rx.el.div(
-        rx.icon(tag=rx.cond(verified, "check", "triangle-alert"), size=11, color="white"),
-        rx.el.span(
-            rx.cond(verified, t("verified_badge"), t("error_badge")),
-            style={"font_family": FONT_BODY, "font_size": "10px", "font_weight": "700", "color": "white"},
-        ),
+    return rx.el.span(
+        rx.cond(verified, t("verified_badge"), t("error_badge")),
         style={
-            "display": "flex",
-            "align_items": "center",
-            "gap": "4px",
-            "padding": "4px 9px",
-            "border_radius": "999px",
-            "background": rx.cond(verified, TEAL, RUST),
+            "font_family": FONT_BODY,
+            "font_size": "11px",
+            "font_weight": "600",
+            "color": rx.cond(verified, TEAL, RUST),
+            "background": rx.cond(verified, TEAL_SOFT, RUST_TINT),
+            "padding": "4px 8px",
+            "border_radius": "6px",
             "flex_shrink": "0",
+            "white_space": "nowrap",
         },
     )
 
@@ -1300,113 +1300,121 @@ def timeline_card():
         verified = item["verified"] == "true"
         return rx.el.div(
             rx.el.div(
-                rx.el.div(style={
-                    "width": "6px", "height": "6px", "border_radius": "999px",
-                    "background": rx.cond(verified, RUST, INK_SOFT), "margin_top": "6px", "flex_shrink": "0",
-                }),
-                rx.el.div(
-                    rx.el.p(item["step"], style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "700", "color": INK, "margin": "0"}),
-                    rx.el.p(item["api_label"], style={"font_family": FONT_BODY, "font_size": "11px", "font_weight": "600", "color": RUST, "margin": "2px 0 0 0"}),
-                    rx.el.p(item["detail"], style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "3px 0 0 0", "line_height": "1.4"}),
-                    style={"text_align": RawiState.text_align, "flex": "1"},
+                rx.el.div(style={"width": "12px", "height": "12px", "border_radius": "50%", "background": RUST, "flex_shrink": "0"}),
+                rx.cond(
+                    item["is_last"] != "true",
+                    rx.el.div(style={"width": "2px", "flex": "1", "background": LINE, "min_height": "70px"}),
                 ),
+                style={"width": "24px", "flex_shrink": "0", "display": "flex", "flex_direction": "column", "align_items": "center"},
+            ),
+            rx.el.div(
+                rx.el.div(
+                    rx.el.p(item["step"], style={"font_family": FONT_HEADING, "font_weight": "700", "font_size": "15px", "color": INK, "margin": "0"}),
+                    verified_badge(verified),
+                    style={
+                        "display": "flex",
+                        "align_items": "center",
+                        "justify_content": "space-between",
+                        "gap": "8px",
+                        "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+                    },
+                ),
+                rx.el.p(item["api_label"], style={"font_family": FONT_BODY, "font_weight": "700", "font_size": "11px", "color": GOLD, "margin": "0"}),
+                rx.el.p(item["detail"], style={"font_family": FONT_BODY, "font_size": "13px", "color": INK_SOFT, "line_height": "1.4", "margin": "0"}),
                 style={
-                    "display": "flex",
-                    "gap": "8px",
                     "flex": "1",
-                    "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+                    "min_width": "0",
+                    "padding_bottom": "20px",
+                    "display": "flex",
+                    "flex_direction": "column",
+                    "gap": "4px",
+                    "text_align": RawiState.text_align,
                 },
             ),
-            verified_badge(verified),
-            style={
-                "display": "flex",
-                "align_items": "flex-start",
-                "justify_content": "space-between",
-                "gap": "8px",
-                "padding": "10px 0",
-                "border_bottom": f"1px solid {LINE}",
-            },
+            style={"display": "flex", "gap": "12px", "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row")},
         )
 
-    return card(
-        section_label("shield-check", t("active_verifications"), TEAL),
-        rx.el.p(
-            t("camara_proof_body"),
-            style={
-                "font_family": FONT_BODY,
-                "font_size": "12px",
-                "color": INK_SOFT,
-                "margin": "0 0 10px 0",
-                "line_height": "1.5",
-                "text_align": RawiState.text_align,
-            },
-        ),
-        sim_swap_banner(),
+    return rx.el.div(
+        screen_title("active_verifications"),
         rx.el.div(rx.foreach(RawiState.timeline, row), style={"width": "100%"}),
-    )
-
-
-def sim_swap_banner():
-    status = RawiState.sim_swap_status
-    label = rx.match(
-        status,
-        ("swapped", t("sim_swap_swapped")),
-        ("no_swap", t("sim_swap_no_swap")),
-        t("sim_swap_unknown"),
-    )
-    accent = rx.cond(status == "swapped", RUST, TEAL)
-    return rx.cond(
-        status != "",
-        rx.el.div(
-            rx.icon(tag="shield-alert", size=16, color=accent),
-            rx.el.span(label, style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": INK}),
-            style={
-                "display": "flex",
-                "align_items": "center",
-                "gap": "8px",
-                "padding": "8px 12px",
-                "margin_bottom": "10px",
-                "border_radius": "8px",
-                "background": TEAL_SOFT,
-                "border_inline_start": f"3px solid {accent}",
-                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
-            },
-        ),
+        style={"display": "flex", "flex_direction": "column", "gap": "8px", "width": "100%"},
     )
 
 
 def what_is_camara_card():
-    return card(
-        section_label("info", t("what_is_camara_title"), INK_SOFT),
+    return rx.el.div(
+        rx.el.div(
+            rx.icon(tag="circle-alert", size=18, color=RUST),
+            rx.el.p(
+                t("what_is_camara_title"),
+                style={"font_family": FONT_HEADING, "font_size": "15px", "font_weight": "700", "color": INK, "margin": "0"},
+            ),
+            style={
+                "display": "flex",
+                "align_items": "center",
+                "gap": "8px",
+                "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
+            },
+        ),
         rx.el.p(
             t("what_is_camara_body"),
             style={
                 "font_family": FONT_BODY,
-                "font_size": "12px",
+                "font_size": "13px",
                 "color": INK_SOFT,
                 "margin": "0",
-                "line_height": "1.6",
+                "line_height": "1.4",
                 "text_align": RawiState.text_align,
             },
         ),
+        style={
+            "display": "flex",
+            "flex_direction": "column",
+            "gap": "10px",
+            "width": "100%",
+            "background": CARD,
+            "border": f"1px solid {LINE}",
+            "border_radius": "16px",
+            "padding": "16px",
+            "box_sizing": "border-box",
+        },
     )
 
 
 def all_systems_banner():
     return rx.el.div(
-        rx.icon(tag="shield-check", size=20, color="white"),
-        rx.el.span(
-            t("ai_systems_verified"),
-            style={"font_family": FONT_HEADING, "font_size": "15px", "font_weight": "700", "color": "white"},
+        rx.el.div(
+            rx.icon(tag="shield-check", size=20, color=TEAL),
+            style={
+                "width": "44px",
+                "height": "44px",
+                "border_radius": "22px",
+                "background": "white",
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "center",
+                "flex_shrink": "0",
+            },
+        ),
+        rx.el.div(
+            rx.el.p(
+                t("ai_systems_verified"),
+                style={"font_family": FONT_HEADING, "font_size": "16px", "font_weight": "700", "color": "white", "margin": "0"},
+            ),
+            rx.el.p(
+                t("verify_banner_sub"),
+                style={"font_family": FONT_BODY, "font_size": "12px", "color": "white", "opacity": "0.8", "margin": "0"},
+            ),
+            style={"display": "flex", "flex_direction": "column", "gap": "2px", "min_width": "0"},
         ),
         style={
             "display": "flex",
             "align_items": "center",
-            "gap": "10px",
+            "gap": "12px",
             "width": "100%",
-            "padding": "14px 18px",
+            "padding": "16px",
             "border_radius": "16px",
-            "background": f"linear-gradient(135deg, {TEAL}, {TEAL_DEEP})",
+            "background": TEAL,
             "box_sizing": "border-box",
             "flex_direction": rx.cond(RawiState.is_ar, "row-reverse", "row"),
         },
@@ -1431,7 +1439,7 @@ def camara_tab():
             ),
         ),
         what_is_camara_card(),
-        style={"width": "100%"},
+        style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
     )
 
 
@@ -1629,90 +1637,78 @@ def passport_badge(item):
         rx.el.div(
             rx.cond(
                 stamped,
-                rx.el.span(
-                    item["code"],
-                    style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "700", "color": TEAL},
-                ),
+                rx.el.span(item["code"], style={"font_family": FONT_HEADING, "font_size": "14px", "font_weight": "800", "color": TEAL}),
                 rx.icon(tag="lock", size=16, color=INK_SOFT),
             ),
             style={
-                "width": "48px",
-                "height": "48px",
+                "width": "56px",
+                "height": "56px",
                 "border_radius": "999px",
                 "display": "flex",
                 "align_items": "center",
                 "justify_content": "center",
-                "border": f"2px dashed {rx.cond(stamped, TEAL, LINE)}",
-                "background": rx.cond(stamped, TEAL_SOFT, "transparent"),
+                "border": f"{rx.cond(stamped, '2px', '1px')} dashed {rx.cond(stamped, TEAL, '#AFA595')}",
                 "flex_shrink": "0",
             },
         ),
         rx.el.p(
             item["name"],
-            style={
-                "font_family": FONT_BODY,
-                "font_size": "12px",
-                "font_weight": "700",
-                "color": rx.cond(stamped, INK, INK_SOFT),
-                "text_align": "center",
-                "margin": "8px 0 0 0",
-            },
+            style={"font_family": FONT_HEADING, "font_size": "13px", "font_weight": "700", "color": INK, "text_align": "center", "margin": "0"},
         ),
         rx.cond(
             stamped,
-            rx.el.p(
-                item["date"],
-                style={"font_family": FONT_BODY, "font_size": "10px", "color": INK_SOFT, "margin": "2px 0 0 0"},
-            ),
+            rx.el.p(item["date"], style={"font_family": FONT_BODY, "font_size": "10px", "color": RUST, "margin": "0"}),
+            rx.el.p(t("locked_label"), style={"font_family": FONT_BODY, "font_size": "10px", "color": INK, "opacity": "0.7", "margin": "0"}),
         ),
         style={
             "display": "flex",
             "flex_direction": "column",
             "align_items": "center",
-            "padding": "14px 10px",
-            "border_radius": "14px",
-            "border": f"1px solid {LINE}",
-            "background": rx.cond(stamped, CARD, SAND),
+            "gap": "8px",
+            "padding": "12px",
+            "border_radius": "20px",
+            "border": rx.cond(stamped, f"2px solid {GOLD}", f"1.5px dashed {LINE_DEEP}"),
+            "background": rx.cond(stamped, "white", LINE),
+            "box_shadow": rx.cond(stamped, "0 4px 4px rgba(192, 138, 46, 0.11)", "none"),
+            "opacity": rx.cond(stamped, "1", "0.6"),
+            "text_align": "center",
         },
     )
 
 
-def passport_strip():
-    return card(
+def passport_progress_row():
+    return rx.el.div(
         rx.el.div(
             rx.el.span(
                 t("stamps_collected"),
-                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": INK_SOFT},
+                style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "600", "color": INK},
             ),
             rx.el.span(
                 RawiState.passport_count_label,
-                style={"font_family": FONT_BODY, "font_size": "12px", "font_weight": "700", "color": TEAL},
+                style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "700", "color": TEAL},
             ),
-            style={"display": "flex", "align_items": "center", "justify_content": "space-between", "margin_bottom": "12px"},
-        ),
-        rx.el.div(
-            rx.foreach(RawiState.passport_cards, passport_badge),
-            style={"display": "grid", "grid_template_columns": "1fr 1fr", "gap": "10px", "width": "100%"},
+            style={"display": "flex", "align_items": "center", "justify_content": "space-between"},
         ),
         rx.el.div(
             rx.el.div(
                 style={
                     "height": "100%",
                     "width": RawiState.passport_progress_pct,
-                    "background": f"linear-gradient(90deg, {GOLD}, {TEAL})",
-                    "border_radius": "999px",
+                    "background": TEAL,
+                    "border_radius": "5px",
                     "transition": "width 0.3s ease",
                 },
             ),
-            style={
-                "width": "100%",
-                "height": "6px",
-                "background": SAND,
-                "border_radius": "999px",
-                "overflow": "hidden",
-                "margin_top": "16px",
-            },
+            style={"width": "100%", "height": "10px", "background": LINE, "border_radius": "5px", "overflow": "hidden"},
         ),
+        style={"display": "flex", "flex_direction": "column", "gap": "6px", "width": "100%"},
+    )
+
+
+def passport_strip():
+    return rx.el.div(
+        rx.foreach(RawiState.passport_cards, passport_badge),
+        style={"display": "grid", "grid_template_columns": "1fr 1fr", "gap": "12px", "width": "100%"},
     )
 
 
@@ -1722,18 +1718,23 @@ def passport_tab():
             screen_title("passport_title"),
             rx.el.p(
                 t("passport_hint"),
-                style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "4px 0 0 0"},
+                style={"font_family": FONT_BODY, "font_size": "12px", "color": INK_SOFT, "margin": "0", "text_align": "center"},
             ),
             style={
                 "width": "100%",
-                "padding": "14px 16px",
-                "border_radius": "14px",
+                "padding": "16px",
+                "border_radius": "16px",
                 "border": f"2px dashed {GOLD}",
                 "background": CARD,
                 "box_sizing": "border-box",
-                "margin_bottom": "4px",
+                "display": "flex",
+                "flex_direction": "column",
+                "align_items": "center",
+                "gap": "8px",
+                "text_align": "center",
             },
         ),
+        passport_progress_row(),
         passport_strip(),
         style={"display": "flex", "flex_direction": "column", "gap": "16px", "width": "100%"},
     )
