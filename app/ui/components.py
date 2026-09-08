@@ -940,6 +940,35 @@ def al_fahidi_illustration():
     )
 
 
+def petra_illustration():
+    return _illustration_frame(
+        SKY_ROSE,
+        [_wave(16, 5, GOLD, opacity=0.5), _wave(28, 6, SKY_PEACH, opacity=0.6), _wave(40, 4, GOLD, opacity=0.35)],
+        rx.el.polygon(points="0,130 0,20 45,50 45,130", fill=RUST_DARK, opacity="0.85"),
+        rx.el.polygon(points="320,130 320,20 275,50 275,130", fill=RUST_DARK, opacity="0.85"),
+        rx.el.rect(x="130", y="70", width="60", height="60", fill=RUST),
+        rx.el.rect(x="140", y="55", width="8", height="15", fill=RUST),
+        rx.el.rect(x="172", y="55", width="8", height="15", fill=RUST),
+        rx.el.polygon(points="130,55 190,55 160,35", fill=RUST),
+        rx.el.circle(cx="160", cy="28", r="6", fill=GOLD),
+        rx.el.rect(x="152", y="100", width="16", height="30", fill=INK),
+    )
+
+
+def hegra_illustration():
+    return _illustration_frame(
+        SKY_PEACH,
+        [_wave(16, 5, GOLD, opacity=0.55), _wave(28, 6, SKY_ROSE, opacity=0.5), _wave(40, 4, GOLD, opacity=0.35)],
+        rx.el.path(d="M0 130 Q40 105 90 130 T180 130 T270 130 T320 130 Z", fill=SKY_ROSE, opacity="0.5"),
+        rx.el.rect(x="115", y="60", width="90", height="70", fill=RUST),
+        rx.el.rect(x="120", y="50", width="14", height="10", fill=RUST),
+        rx.el.rect(x="139", y="44", width="14", height="16", fill=RUST),
+        rx.el.rect(x="167", y="44", width="14", height="16", fill=RUST),
+        rx.el.rect(x="186", y="50", width="14", height="10", fill=RUST),
+        rx.el.rect(x="152", y="100", width="20", height="30", fill=INK),
+    )
+
+
 def site_illustration():
     return landmark_thumbnail(RawiState.selected_site_id)
 
@@ -952,6 +981,8 @@ def landmark_thumbnail(site_id):
         site_id,
         ("qasr-al-hosn", qasr_al_hosn_illustration()),
         ("al-fahidi", al_fahidi_illustration()),
+        ("petra", petra_illustration()),
+        ("hegra", hegra_illustration()),
         al_hisn_fort_illustration(),
     )
 

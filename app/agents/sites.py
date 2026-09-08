@@ -75,10 +75,59 @@ AL_FAHIDI = {
 }
 
 
+PETRA = {
+    "id": "petra",
+    "name_en": "Petra",
+    "name_ar": "البتراء",
+    "country_code": "JO",
+    "country_en": "Jordan",
+    "country_ar": "الأردن",
+    "city_code": "wadi-musa",
+    "city_en": "Wadi Musa",
+    "city_ar": "وادي موسى",
+    "lat": 30.3285,
+    "lon": 35.4444,
+    "radius_meters": 250,
+    "tags": ["nabataean", "tombs", "unesco", "canyon"],
+    "alt_name_en": "Petra - Quieter High Place Trail",
+    "alt_name_ar": "البتراء - مسار المكان المرتفع الهادئ",
+    "alt_lat": 30.3247,
+    "alt_lon": 35.4472,
+    "teaser_en": "A rose-red city carved into sandstone cliffs by the Nabataeans, reached through a narrow canyon.",
+    "teaser_ar": "مدينة وردية اللون نحتها الأنباط في صخور رملية، يصل إليها الزائر عبر ممر صخري ضيق.",
+    "stamp_code": "AQJ",
+}
+
+HEGRA = {
+    "id": "hegra",
+    "name_en": "Hegra",
+    "name_ar": "الحِجر",
+    "country_code": "SA",
+    "country_en": "Saudi Arabia",
+    "country_ar": "المملكة العربية السعودية",
+    "city_code": "alula",
+    "city_en": "AlUla",
+    "city_ar": "العُلا",
+    "lat": 26.7911,
+    "lon": 37.9533,
+    "radius_meters": 250,
+    "tags": ["nabataean", "tombs", "unesco", "desert"],
+    "alt_name_en": "Hegra - Quieter North Ridge Path",
+    "alt_name_ar": "الحِجر - مسار التلال الشمالية الهادئ",
+    "alt_lat": 26.7944,
+    "alt_lon": 37.9567,
+    "teaser_en": "Saudi Arabia's first UNESCO site: over 100 monumental Nabataean tombs carved into desert sandstone.",
+    "teaser_ar": "أول موقع سعودي على قائمة اليونسكو للتراث العالمي: أكثر من مئة مقبرة نبطية منحوتة في صخور الصحراء.",
+    "stamp_code": "ULH",
+}
+
+
 DEMO_SITES = {
     AL_HISN_FORT["id"]: AL_HISN_FORT,
     QASR_AL_HOSN["id"]: QASR_AL_HOSN,
     AL_FAHIDI["id"]: AL_FAHIDI,
+    PETRA["id"]: PETRA,
+    HEGRA["id"]: HEGRA,
 }
 
 DEFAULT_SITE_ID = AL_HISN_FORT["id"]
