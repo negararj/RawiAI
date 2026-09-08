@@ -139,7 +139,7 @@ _STRINGS = {
         "نحن لا نعتمد على GPS المتصفح فقط - كل خطوة أدناه مؤكدة عبر استدعاء فعلي لواجهات نوكيا CAMARA.",
     ),
     "ai_systems_verified": ("All Systems Verified", "جميع الأنظمة موثّقة"),
-    "verify_banner_sub": ("Presence verified via active UAE telecom node", "تم التحقق من الحضور عبر شبكة اتصالات إماراتية نشطة"),
+    "verify_banner_sub": ("Presence verified via active telecom node", "تم التحقق من الحضور عبر شبكة اتصالات نشطة"),
     "active_verifications": ("Active Network Handshakes", "المصافحات الشبكية النشطة"),
     "verified_badge": ("Verified", "موثّق"),
     "error_badge": ("Error", "خطأ"),

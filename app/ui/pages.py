@@ -55,10 +55,6 @@ _PATTERN_SVG = (
 
 _GLOBAL_ANIMATIONS = """
 <style>
-@keyframes rawiSway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
 @keyframes rawiSplashOut {
   0%, 75% { opacity: 1; }
   100% { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -66,10 +62,6 @@ _GLOBAL_ANIMATIONS = """
 @keyframes rawiPulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.04); }
-}
-@keyframes rawiWalk {
-  0% { left: -15%; }
-  100% { left: 115%; }
 }
 @keyframes pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(174, 90, 46, 0.5); }
@@ -84,55 +76,6 @@ def splash_screen():
     fading out on its own via a fixed-duration CSS animation - no need to
     hook into the backend connection lifecycle."""
     return rx.el.div(
-        rx.icon(
-            tag="compass",
-            size=30,
-            color=TEAL_DEEP,
-            style={"position": "absolute", "top": "10%", "right": "12%", "opacity": "0.8"},
-        ),
-        rx.el.div(
-            style={
-                "position": "absolute",
-                "bottom": "18%",
-                "right": "8%",
-                "width": "60px",
-                "height": "100px",
-                "background_image": "url('/illustrations/palm.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.9",
-                "animation": "rawiSway 6s ease-in-out infinite",
-                "transform_origin": "bottom center",
-            }
-        ),
-        rx.el.div(
-            style={
-                "position": "fixed",
-                "bottom": "12%",
-                "width": "100px",
-                "height": "57px",
-                "background_image": "url('/illustrations/camel.png')",
-                "background_repeat": "no-repeat",
-                "background_size": "contain",
-                "opacity": "0.9",
-                "animation": "rawiWalk 14s linear infinite",
-            }
-        ),
-        rx.el.svg(
-            rx.el.path(
-                d="M20 20 Q40 40 20 60 Q0 80 30 90",
-                stroke=INK,
-                stroke_width="2",
-                fill="none",
-                stroke_dasharray="4,5",
-            ),
-            rx.el.line(x1="26", y1="86", x2="34", y2="94", stroke=INK, stroke_width="2"),
-            rx.el.line(x1="34", y1="86", x2="26", y2="94", stroke=INK, stroke_width="2"),
-            view_box="0 0 100 100",
-            width="70",
-            height="70",
-            style={"position": "absolute", "top": "14%", "left": "10%", "opacity": "0.7"},
-        ),
         rx.el.div(
             rx.el.div(
                 rx.icon(tag="compass", size=24, color=TEAL_DEEP),
@@ -162,7 +105,7 @@ def splash_screen():
                 ),
                 rx.el.p("راوي", style={"font_family": FONT_HEADING, "font_size": "15px", "color": TEAL_DEEP, "margin": "2px 0 10px 0"}),
                 rx.el.p(
-                    "UAE STORIES UNLEASHED",
+                    "HERITAGE STORIES UNLEASHED",
                     style={
                         "font_family": FONT_BODY,
                         "font_size": "10px",
