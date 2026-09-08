@@ -17,6 +17,7 @@ app = rx.App(
     stylesheets=[
         "https://fonts.googleapis.com/css2?"
         "family=Baloo+2:wght@500;600;700;800"
+        "&family=Lalezar"
         "&family=Reem+Kufi:wght@400..700"
         "&family=Tajawal:wght@400;500;700;800"
         "&family=Inter:wght@400;500;600;700"

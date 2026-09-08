@@ -33,7 +33,7 @@ SKY_ROSE = "#E3A9A0"
 SKY_PEACH = "#F5DCC0"
 SKY_MINT = "#D8ECE6"
 
-FONT_HEADING = "'Baloo 2', 'Reem Kufi', 'Tajawal', ui-rounded, sans-serif"
+FONT_HEADING = "'Baloo 2', 'Lalezar', 'Tajawal', ui-rounded, sans-serif"
 FONT_BODY = "'Inter', 'Tajawal', system-ui, sans-serif"
 FONT_STORY = "'Amiri', 'Tajawal', serif"
 
