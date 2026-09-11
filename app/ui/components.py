@@ -252,6 +252,7 @@ def brand_header():
             ),
             rx.el.p(
                 "راوي",
+                dir="rtl",
                 style={
                     "font_family": FONT_HEADING,
                     "font_size": "12px",
@@ -284,24 +285,26 @@ def hero():
     return rx.el.div(
         rx.el.p(
             heading,
+            dir="ltr",
             style={
                 "font_family": FONT_HEADING,
                 "font_size": "16px",
                 "font_weight": "700",
                 "color": RUST,
                 "margin": "0",
-                "text_align": RawiState.text_align,
+                "text_align": "left",
             },
         ),
         rx.el.p(
             heading_ar,
+            dir="rtl",
             style={
                 "font_family": FONT_BODY,
                 "font_size": "14px",
                 "font_weight": "600",
                 "color": INK,
                 "margin": "0",
-                "text_align": RawiState.text_align,
+                "text_align": "right",
             },
         ),
         style={

@@ -103,7 +103,7 @@ def splash_screen():
                         "letter_spacing": "0.5px",
                     },
                 ),
-                rx.el.p("راوي", style={"font_family": FONT_HEADING, "font_size": "15px", "color": TEAL_DEEP, "margin": "2px 0 10px 0"}),
+                rx.el.p("راوي", dir="rtl", style={"font_family": FONT_HEADING, "font_size": "15px", "color": TEAL_DEEP, "margin": "2px 0 10px 0"}),
                 rx.el.p(
                     "HERITAGE STORIES UNLEASHED",
                     style={
@@ -141,6 +141,7 @@ def splash_screen():
             ),
             rx.el.p(
                 "يروي لك الحكاية دون أي تحميل",
+                dir="rtl",
                 style={"font_family": FONT_HEADING, "font_size": "13px", "color": INK_SOFT, "margin": "0 0 20px 0", "text_align": "center"},
             ),
             rx.el.button(
