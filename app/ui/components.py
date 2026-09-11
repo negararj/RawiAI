@@ -47,50 +47,9 @@ CARD_STYLE = {
     "position": "relative",
 }
 
-# A thin repeating eight-point-star motif used as a hairline accent under
-# card headers - a nod to Islamic geometric pattern work without needing an
-# image asset.
-_STAR_DIVIDER_SVG = (
-    "data:image/svg+xml;utf8,"
-    "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8'>"
-    "<path d='M0 4 L4 4 M8 1 L10 4 L8 7 M14 1 L16 4 L14 7 M20 4 L24 4' "
-    "stroke='%23C08A2E' stroke-width='1' fill='none' opacity='0.55'/>"
-    "</svg>"
-)
-
-
 def card(*children, **style):
     merged = {**CARD_STYLE, **style}
     return rx.el.div(*children, style=merged)
-
-
-def star_divider():
-    return rx.el.div(
-        style={
-            "width": "100%",
-            "height": "8px",
-            "background_image": f"url(\"{_STAR_DIVIDER_SVG}\")",
-            "background_repeat": "repeat-x",
-            "background_position": "center",
-            "margin": "10px 0",
-            "opacity": "0.8",
-        }
-    )
-
-
-def eyebrow(text, color: str = RUST):
-    return rx.el.p(
-        text,
-        style={
-            "font_family": FONT_BODY,
-            "font_size": "11px",
-            "font_weight": "700",
-            "letter_spacing": "1.5px",
-            "text_transform": "uppercase",
-            "color": color,
-            "margin": "0",
-        },
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -101,12 +60,6 @@ _STRINGS = {
     "tagline": ("App-Free Telecom-Native Storyteller", "راوي حضاري بلا تطبيقات، عبر شبكتك"),
     "network_ready": ("5G Active", "5G نشطة"),
     "hero_title": ("Let the network\ntell the story.", "دع الشبكة\nترِ الحكاية."),
-    "hero_body": (
-        "No app download. No rented headset. RawiAI verifies you're really "
-        "at the site through Nokia CAMARA network APIs, then speaks its history aloud.",
-        "بلا تحميل تطبيق، وبلا استئجار سماعات. راوي يتحقق من وجودك فعليًا عند الموقع "
-        "عبر واجهات نوكيا CAMARA، ثم يروي لك قصته صوتيًا.",
-    ),
     "identity": ("Identity", "الهوية"),
     "presence": ("Presence", "الحضور"),
     "network": ("Network", "الشبكة"),
@@ -126,17 +79,11 @@ _STRINGS = {
     "source": ("Source", "المصدر"),
     "route": ("Route", "المسار"),
     "heritage_trail_route": ("Heritage Trail Route", "مسار الرحلة التراثية"),
-    "network_quality": ("Network Quality", "جودة الشبكة"),
     "excellent_coverage": ("Excellent Coverage", "تغطية ممتازة"),
     "qod_line": ("Quality on Demand", "جودة الخدمة عند الطلب"),
     "qod_detail": (
         "Requested extra bandwidth priority so narration streams without buffering.",
         "تم طلب أولوية إضافية في النطاق الترددي ليصلك الصوت دون تقطّع.",
-    ),
-    "camara_proof": ("CAMARA Proof", "إثبات CAMARA"),
-    "camara_proof_body": (
-        "We're not only using browser GPS — every step below is confirmed by a Nokia CAMARA network API call.",
-        "نحن لا نعتمد على GPS المتصفح فقط - كل خطوة أدناه مؤكدة عبر استدعاء فعلي لواجهات نوكيا CAMARA.",
     ),
     "ai_systems_verified": ("All Systems Verified", "جميع الأنظمة موثّقة"),
     "verify_banner_sub": ("Presence verified via active telecom node", "تم التحقق من الحضور عبر شبكة اتصالات نشطة"),
