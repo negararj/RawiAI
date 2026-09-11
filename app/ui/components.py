@@ -1024,6 +1024,7 @@ def story_card():
         ),
         rx.cond(RawiState.story_page_count > 1, story_pager()),
         rx.el.p(RawiState.answer, id="rawi-answer", style={"display": "none"}),
+        rx.el.audio(src=RawiState.audio_url, id="rawi-tts-audio", style={"display": "none"}),
         rx.el.div(
             rx.el.button(
                 rx.icon(tag="volume-2", size=14, color="white"),
@@ -1033,13 +1034,19 @@ def story_card():
                 ),
                 on_click=rx.call_script(
                     """
-const text = document.getElementById("rawi-answer")?.innerText || "";
-const language = document.getElementById("rawi-language")?.innerText || "en";
-if (text.trim()) {
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = language === "ar" ? "ar-SA" : "en-US";
-  window.speechSynthesis.speak(utterance);
+const audioEl = document.getElementById("rawi-tts-audio");
+if (audioEl && audioEl.getAttribute("src")) {
+  audioEl.currentTime = 0;
+  audioEl.play();
+} else {
+  const text = document.getElementById("rawi-answer")?.innerText || "";
+  const language = document.getElementById("rawi-language")?.innerText || "en";
+  if (text.trim()) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === "ar" ? "ar-SA" : "en-US";
+    window.speechSynthesis.speak(utterance);
+  }
 }
 """
                 ),
@@ -1060,7 +1067,13 @@ if (text.trim()) {
                     t("stop"),
                     style={"font_family": FONT_BODY, "font_size": "13px", "font_weight": "600", "color": RUST},
                 ),
-                on_click=rx.call_script("window.speechSynthesis.cancel();"),
+                on_click=rx.call_script(
+                    """
+window.speechSynthesis.cancel();
+const audioEl = document.getElementById("rawi-tts-audio");
+if (audioEl) audioEl.pause();
+"""
+                ),
                 style={
                     "display": "flex",
                     "align_items": "center",

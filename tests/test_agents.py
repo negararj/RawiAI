@@ -14,6 +14,7 @@ def test_demo_flow_stub(monkeypatch):
     monkeypatch.setattr("app.camara.sim_swap.NOKIA_API_KEY", "")
     monkeypatch.setattr("app.camara.qos.NOKIA_API_KEY", "")
     monkeypatch.setattr("app.camara.qos.NOKIA_TEST_PHONE_NUMBER", "")
+    monkeypatch.setattr("app.audio.tts.RAWIAI_USE_FREETTS", False)
 
     result = run_demo_flow()
     assert "identity" in result

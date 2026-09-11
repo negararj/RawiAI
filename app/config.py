@@ -28,6 +28,14 @@ GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-0
 RAWIAI_USE_QDRANT = os.getenv("RAWIAI_USE_QDRANT", "false").lower() == "true"
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 
+# Real narration audio via FreeTTS (freetts.org - a real, paid-company-run
+# service with a free tier: 5,000 chars/generation, 15,000/month). Falls
+# back to the browser's free built-in voice on any error (quota, network).
+RAWIAI_USE_FREETTS = os.getenv("RAWIAI_USE_FREETTS", "false").lower() == "true"
+FREETTS_API_KEY = os.getenv("FREETTS_API_KEY", "")
+FREETTS_VOICE_EN = os.getenv("FREETTS_VOICE_EN", "en-US-JennyNeural")
+FREETTS_VOICE_AR = os.getenv("FREETTS_VOICE_AR", "ar-AE-FatimaNeural")
+
 # Real SMS-triggered entry: when a CAMARA geofencing "area-entered" event
 # arrives at /geofence, send the visitor a link via Twilio. Off by default -
 # needs a real Twilio account (or another provider swapped into

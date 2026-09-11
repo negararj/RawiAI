@@ -304,7 +304,7 @@ def run_demo_flow(
     route = final_state["route"]
     qos_result = final_state["qos_result"]
 
-    audio_result = text_to_speech(qa_result["answer"])
+    audio_result = text_to_speech(qa_result["answer"], language=language)
 
     record_visit(
         site_id=site_id,
