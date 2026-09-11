@@ -476,7 +476,17 @@ JSON.stringify({
         await asyncio.sleep(0.35)
 
         effective_question = self.question.strip() or "Tell me the story of this place."
-        result = run_demo_flow(effective_question, language=self.language, site_id=self.selected_site_id)
+        try:
+            result = run_demo_flow(effective_question, language=self.language, site_id=self.selected_site_id)
+        except Exception:
+            # A live Nokia/Gemini/audio call failed in a way none of their
+            # own try/excepts caught. Show a plain retry message instead of
+            # letting it surface as the generic "contact the administrator"
+            # error toast, and leave the story empty rather than half-built.
+            self.is_loading = False
+            self.status = "Something interrupted the network check - please tap Begin the Story again."
+            yield
+            return
 
         self.camara_calls = result["camara_calls"]
         _raw_timeline = result["timeline"]
