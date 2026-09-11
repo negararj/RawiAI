@@ -28,6 +28,21 @@ GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-0
 RAWIAI_USE_QDRANT = os.getenv("RAWIAI_USE_QDRANT", "false").lower() == "true"
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 
+# Real narration audio, instead of the browser's free built-in voice.
+# Tried in this order - each falls through to the next on any error (rate
+# limit, quota, network): OpenAI TTS, then ElevenLabs, then the browser
+# voice. All off by default. See app/audio/tts.py.
+RAWIAI_USE_OPENAI_TTS = os.getenv("RAWIAI_USE_OPENAI_TTS", "false").lower() == "true"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
+OPENAI_TTS_VOICE = os.getenv("OPENAI_TTS_VOICE", "coral")
+
+RAWIAI_USE_ELEVENLABS = os.getenv("RAWIAI_USE_ELEVENLABS", "false").lower() == "true"
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+# "Rachel" - a premade ElevenLabs voice that supports the multilingual
+# model (used here for English/Arabic narration). Override to try another.
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+
 # Real SMS-triggered entry: when a CAMARA geofencing "area-entered" event
 # arrives at /geofence, send the visitor a link via Twilio. Off by default -
 # needs a real Twilio account (or another provider swapped into

@@ -103,6 +103,7 @@ class RawiState(rx.State):
     geofence_status: str = ""
     sim_swap_status: str = ""
     story_source: str = ""
+    audio_data_url: str = ""
     flow_summary: str = ""
     pwa_status: str = "Installable on supported mobile browsers"
 
@@ -265,6 +266,7 @@ class RawiState(rx.State):
         self.geofence_status = ""
         self.sim_swap_status = ""
         self.story_source = ""
+        self.audio_data_url = ""
         self.status = "Tap Begin and let the network find you."
 
     @rx.var
@@ -515,6 +517,7 @@ JSON.stringify({
 
         self.answer = result["qa"]["answer"]
         self.story_source = result["qa"]["source"]
+        self.audio_data_url = result["audio"].get("audio_data_url", "")
         self.status = "The storyteller is speaking..."
         yield
         await asyncio.sleep(0.3)
