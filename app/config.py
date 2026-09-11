@@ -35,5 +35,10 @@ QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 RAWIAI_USE_SMS = os.getenv("RAWIAI_USE_SMS", "false").lower() == "true"
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+# A Twilio API Key (SID starts with "SK") can be used instead of the Auth
+# Token for Basic Auth - the Account SID above is still required either
+# way, since it's part of the request URL itself, not just the auth header.
+TWILIO_API_KEY_SID = os.getenv("TWILIO_API_KEY_SID", "")
+TWILIO_API_KEY_SECRET = os.getenv("TWILIO_API_KEY_SECRET", "")
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
 RAWIAI_APP_URL = os.getenv("RAWIAI_APP_URL", "")

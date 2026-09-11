@@ -13,6 +13,8 @@ import httpx
 from app.config import (
     RAWIAI_USE_SMS,
     TWILIO_ACCOUNT_SID,
+    TWILIO_API_KEY_SECRET,
+    TWILIO_API_KEY_SID,
     TWILIO_AUTH_TOKEN,
     TWILIO_FROM_NUMBER,
 )
@@ -20,9 +22,21 @@ from app.config import (
 TWILIO_API_BASE = "https://api.twilio.com/2010-04-01"
 
 
+def _basic_auth() -> tuple[str, str] | None:
+    """Prefer an API Key (SID starts with "SK") over the Account Auth
+    Token when both are set - either works for Basic Auth, but the
+    Account SID is required regardless since it's also part of the URL."""
+    if TWILIO_API_KEY_SID and TWILIO_API_KEY_SECRET:
+        return (TWILIO_API_KEY_SID, TWILIO_API_KEY_SECRET)
+    if TWILIO_AUTH_TOKEN:
+        return (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    return None
+
+
 def send_arrival_sms(to_number: str, message: str) -> dict:
     """Send a real SMS via Twilio, or return a demo-mode stand-in."""
-    if not RAWIAI_USE_SMS or not (TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_FROM_NUMBER):
+    auth = _basic_auth()
+    if not RAWIAI_USE_SMS or not (TWILIO_ACCOUNT_SID and auth and TWILIO_FROM_NUMBER):
         return {
             "sent": False,
             "to": to_number,
@@ -39,7 +53,7 @@ def send_arrival_sms(to_number: str, message: str) -> dict:
     try:
         response = httpx.post(
             url,
-            auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
+            auth=auth,
             data={"To": to_number, "From": TWILIO_FROM_NUMBER, "Body": message},
             timeout=8,
         )
