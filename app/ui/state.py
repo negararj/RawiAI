@@ -70,6 +70,7 @@ class RawiState(rx.State):
 
     language: str = "en"
     question: str = ""
+    voice_update_seq: int = 0
     status: str = "Tap Begin and let the network find you."
 
     active_tab: str = "explore"
@@ -141,6 +142,12 @@ class RawiState(rx.State):
         self.is_listening = False
         if transcript:
             self.question = transcript
+            # The question input is intentionally uncontrolled (see
+            # ask_card) so typing stays instant and doesn't round-trip
+            # over the websocket on every keystroke. Bumping this forces
+            # the input to remount and pick up the new default_value only
+            # when voice input actually changes the text.
+            self.voice_update_seq += 1
 
     @rx.var
     def is_ar(self) -> bool:

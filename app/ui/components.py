@@ -661,7 +661,8 @@ def ask_card():
             rx.el.div(
                 rx.icon(tag="search", size=15, color=INK_SOFT, style={"flex_shrink": "0"}),
                 rx.el.input(
-                    value=RawiState.question,
+                    default_value=RawiState.question,
+                    key=RawiState.voice_update_seq,
                     on_change=RawiState.set_question,
                     placeholder=t("question_placeholder"),
                     dir=RawiState.dir,
